@@ -54,10 +54,11 @@ type Game =
       Turn: Player
       Size: int }
 
-let initnewGame (size: int, humanShips: Ship list, computerShips: Ship list): Game =
+let initNewGame (size: int, humanShips: Ship list, computerShips: Ship list): Game =
 
     let cntFields = size * size
 
+    //TODO: 1.. or 0.. ?! guess 0..
     let fieldList1 =
         [ for a in 1 .. cntFields do
             yield (NotAttempted) ]
@@ -155,7 +156,7 @@ let drawBoards (g: Game) =
 
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
-let hitOnBoard(board: Board, c: Coord) =
+let hitOnBoard (board: Board, c: Coord) =
     // or maybe even better a tuple (board, true) so the caller knows if there was a hit or not
     (board, true)
 
@@ -182,10 +183,36 @@ let tryHitAt (game: Game, c: Coord) =
     // we return the new game
     game
 
+// the human has entered a coordinate -> try to find out if
+// it is a hit or not
+let set (game: Game, c: Coord) =
+
+    // TODO: remove printfn
+    printfn ("set coord = %A") c
+
+    // TODO
+    // check if c is a valid coordinate depending on the size of the board
+    // otherwise do nothing and leave game.Turn
+
+    // update the fields and ships accordingly
+
+    // if it is a hit, then leave game.Turn as it is and the current player can try again
+    // if it is a miss; then switch game.Turn
+
+    // if it is the computers turn, then let the computer randomly choose an action
+
+
+
+    // we return the new game
+    game
+
 
 // Message is a command entered by the user
-type Message = TryAt of Coord
+type Message =
+    | Set of Coord
+    | Try of Coord
 
 let update (msg: Message) (game: Game): Game =
     match msg with
-    | TryAt c -> tryHitAt (game, c)
+    | Set c -> set (game, c)
+    | Try c -> tryHitAt (game, c)

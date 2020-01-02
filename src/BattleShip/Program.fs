@@ -1,14 +1,15 @@
 ﻿[<EntryPoint>]
 let main argv =
+    printfn "================================="
     printfn "Welcome to BattleShip!"
-    printfn "Please enter your commands to interact with the system."
     printfn "Press CTRL+C to stop the program."
-    printf "> "
+    printfn "=================================x"
+    printfn ""
 
-    let HumanShips = Ships.readShipsFromHuman()
-    let RandomComputerShips = Ships.createRandomShips()
+    let humanShips = Ships.readShipsFromHuman()
+    let randomComputerShips = Ships.createRandomShips()
 
-    let game = Domain.initnewGame (5, HumanShips, RandomComputerShips)
+    let game = Domain.initNewGame (5, humanShips, randomComputerShips)
 
     Domain.drawBoards(game)
 

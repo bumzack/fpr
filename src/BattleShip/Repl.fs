@@ -11,7 +11,8 @@ type ReplMessage =
 
 let read (input: string) =
     match input with
-    | TryAt v -> Domain.TryAt v |> DomainMessage
+    | Set v -> Domain.Set v |> DomainMessage
+    | Try v -> Domain.Try v |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed -> NotParsable input
 
@@ -27,7 +28,7 @@ let createHelpText(): string =
 
 
 
-let evaluate (update : Domain.Message -> Game -> Game) (game : Game) (msg : ReplMessage) =
+let evaluate (update: Domain.Message -> Game -> Game) (game: Game) (msg: ReplMessage) =
     match msg with
     | DomainMessage msg ->
         let newState = update msg game
@@ -35,11 +36,12 @@ let evaluate (update : Domain.Message -> Game -> Game) (game : Game) (msg : Repl
         let message = "next try "
         (newState, message)
     | HelpRequested ->
-        let message = createHelpText ()
+        let message = createHelpText()
         (game, message)
     | NotParsable originalInput ->
         let message =
-            sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
+            sprintf """"%s" was not parsable. %s""" originalInput
+                "You can get information about known commands by typing \"Help\""
         (game, message)
 
 let print (game: Game, outputToPrint: string) =
@@ -48,7 +50,7 @@ let print (game: Game, outputToPrint: string) =
 
     game
 
-let rec loop (game : Game) =
+let rec loop (game: Game) =
     Console.ReadLine()
     |> read
     |> evaluate Domain.update game
