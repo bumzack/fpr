@@ -5,8 +5,8 @@ let main argv =
     printfn "Press CTRL+C to stop the program."
     printf "> "
 
-    let HumanShips = Repl.readShipsFromHuman()
-    let RandomComputerShips = Repl.createRandomShips()
+    let HumanShips = Ships.readShipsFromHuman()
+    let RandomComputerShips = Ships.createRandomShips()
 
     let game = Domain.initnewGame (5, HumanShips, RandomComputerShips)
 
