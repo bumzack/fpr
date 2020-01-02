@@ -2,6 +2,8 @@ module Domain
 
 type State = int
 
+
+// Message is a command entered by the user
 type Message =
     | Increment
     | Decrement
