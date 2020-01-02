@@ -6,14 +6,24 @@ let safeEquals (it: string) (theOther: string) =
     String.Equals(it, theOther, StringComparison.OrdinalIgnoreCase)
 
 
+
 [<Literal>]
 let HelpLabel = "Help"
 
+
+
+let mapToCoord (x, y) =
+    let c: Domain.Coord =
+        { X = x
+          Y = y }
+    c
+
+
 let (|TryAt|Help|ParseFailed|) (input: string) =
-//    let tryParseInt (arg: string) valueConstructor =
-//        let (worked, arg') = Int32.TryParse arg
-//        if worked then valueConstructor arg'
-//        else ParseFailed
+    //    let tryParseInt (arg: string) valueConstructor =
+    //        let (worked, arg') = Int32.TryParse arg
+    //        if worked then valueConstructor arg'
+    //        else ParseFailed
 
     let tryParseCoord (arg: string) valueConstructor =
         if arg.Length <> 2 then
@@ -32,9 +42,5 @@ let (|TryAt|Help|ParseFailed|) (input: string) =
 
     | [ verb ] when safeEquals verb HelpLabel -> Help
     | [ verb; arg ] when safeEquals verb (nameof Domain.TryAt) ->
-        tryParseCoord arg (fun (x, y) ->
-            let c: Domain.Coord =
-                { X = x
-                  Y = y }
-            TryAt c)
+        tryParseCoord arg (fun (x, y) -> TryAt (mapToCoord (x,y)))
     | _ -> ParseFailed
