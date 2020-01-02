@@ -115,6 +115,8 @@ let horizontallLine (size: int) =
             yield "-" ]
     implode line
 
+
+// TODO: man that's ugly
 let drawBoard (board: Board) =
     // good old for loop and string concatenation    ¯\_(ツ)_/¯
     let mutable lines = List.empty
@@ -147,14 +149,15 @@ let drawBoards (g: Game) =
     printfn ("my board")
     drawBoard (g.P1Board)
     printfn ("")
-    printfn ("my attempts at opponents board")
+    printfn ("my attempts at the opponents board")
     drawBoard (g.P2Board)
+    printfn ("")
 
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
-let hitOnBoard(b: Board, c: Coord) =
-
-    true
+let hitOnBoard(board: Board, c: Coord) =
+    // or maybe even better a tuple (board, true) so the caller knows if there was a hit or not
+    (board, true)
 
 // the human has entered a coordinate -> try to find out if
 // it is a hit or not
