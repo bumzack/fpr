@@ -1,9 +1,10 @@
 ﻿[<EntryPoint>]
 let main argv =
+    printfn "================================="
     printfn "Welcome to BattleShip!"
-    printfn "Please enter your commands to interact with the system."
     printfn "Press CTRL+C to stop the program."
-    printf "> "
+    printfn "=================================x"
+    printfn ""
 
     let humanShips = Repl.readShipsFromHuman()
     let randomComputerShips = Repl.createRandomShips()
