@@ -17,5 +17,5 @@ FsFhtw is a template project showing a functional example of a F# program. It in
 
 Execute the following command.
 ```bash
-dotnet run src/FsFhtw/FsFhtw.fsproj
+dotnet run --project src/BattleShip/BattleShip.fsproj
 ```
