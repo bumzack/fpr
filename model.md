@@ -26,7 +26,7 @@ man braucht 2 boards? jeder spieler: wo sind meine schiffe, wo habe ich beim geg
         - wasser
         - schiff of int    (schiff index)
 
-- 2 boards: für jeden Spieler eines
+- 2 boards: für jeden Spieler einesattem
 
 - SpielStatus:
     - new (?!)

@@ -5,6 +5,12 @@ let main argv =
     printfn "Press CTRL+C to stop the program."
     printf "> "
 
-    let initialState = Domain.init ()
-    Repl.loop initialState
+    let HumanShips = Repl.readShipsFromHuman()
+    let RandomComputerShips = Repl.createRandomShips()
+
+    let game = Domain.initnewGame (5, HumanShips, RandomComputerShips)
+
+    Domain.drawBoards(game)
+
+    // Repl.loop game
     0 // return an integer exit code
