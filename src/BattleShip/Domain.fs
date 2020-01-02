@@ -1,8 +1,5 @@
 module Domain
 
-open System
-open System.Linq.Expressions
-
 type FieldStatus =
     | Water
     | Hit
@@ -17,10 +14,9 @@ type ShipPointStatus =
     | NotHit
     | ShipHit
 
-type Coord = {
-    X: char
-    Y: int
-}
+type Coord =
+    { X: char
+      Y: int }
 
 type ShipPoint =
     { Coord: Coord
@@ -58,8 +54,7 @@ type Game =
       Turn: Player
       Size: int }
 
-// TODO remove
-let initnewGame (size: int, humanShips: Ship list, computerSHips: Ship list): Game =
+let initnewGame (size: int, humanShips: Ship list, computerShips: Ship list): Game =
 
     let cntFields = size * size
 
@@ -83,10 +78,7 @@ let initnewGame (size: int, humanShips: Ship list, computerSHips: Ship list): Ga
         { Fields = fieldList2
           Size = size
           ShipsDestroyed = 0
-          Ships = computerSHips }
-
-
-
+          Ships = computerShips }
 
     let g =
         { P1Board = board1
@@ -159,29 +151,38 @@ let drawBoards (g: Game) =
     drawBoard (g.P2Board)
 
 
+// can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
+let hitOnBoard(b: Board, c: Coord) =
+
+    true
+
+// the human has entered a coordinate -> try to find out if
+// it is a hit or not
+let tryHitAt (game: Game, c: Coord) =
+
+    // TODO: remove printfn
+    printfn ("tryhitat coord = %A") c
+
+    // TODO
+    // check if c is a valid coordinate depending on the size of the board
+    // otherwise do nothing and leave game.Turn
+
+    // update the fields and ships accordingly
+
+    // if it is a hit, then leave game.Turn as it is and the current player can try again
+    // if it is a miss; then switch game.Turn
+
+    // if it is the computers turn, then let the computer randomly choose an action
 
 
 
-// TODO remove
-type State = int
+    // we return the new game
+    game
 
 
-// TODO adapt/cleanup
 // Message is a command entered by the user
-type Message =
-    | Increment
-    | Decrement
-    | IncrementBy of int
-    | DecrementBy of int
+type Message = TryAt of Coord
 
-
-// TODO remove
-let init(): State =
-    0
-
-let update (msg: Message) (model: State): State =
+let update (msg: Message) (game: Game): Game =
     match msg with
-    | Increment -> model + 1
-    | Decrement -> model - 1
-    | IncrementBy x -> model + x
-    | DecrementBy x -> model - x
+    | TryAt c -> tryHitAt (game, c)

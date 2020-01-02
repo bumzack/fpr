@@ -12,5 +12,5 @@ let main argv =
 
     Domain.drawBoards(game)
 
-    // Repl.loop game
+    Repl.loop game
     0 // return an integer exit code
