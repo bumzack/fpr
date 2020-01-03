@@ -6,16 +6,12 @@ let initNewGame (size: int, computerShips: Ship list): Game =
 
     let cntFields = size * size
 
-    //TODO: 1.. or 0.. ?! guess 0..
     let fieldList1 =
         [ for a in 1 .. cntFields do
             yield (NotAttempted) ]
-
-
-    // TODO: change to NotAttempted: just for debugging purposes
     let fieldList2 =
         [ for a in 1 .. cntFields do
-            yield (Attempted Water) ]
+            yield (NotAttempted) ]
 
     let board1 =
         { Fields = fieldList1
