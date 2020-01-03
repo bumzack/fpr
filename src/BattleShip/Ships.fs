@@ -1,91 +1,98 @@
 module Ships
 
 open Domain
-
-// TODO: dummy implementation replace with ships created from user input
-let readShipsFromHuman() =
-    let c =
-        { X = 'A'
-          Y = 2 }
-    let p11 =
-        { Coord = c
-          PointStatus = NotHit }
-
-    let c =
-        { X = 'A'
-          Y = 3 }
-    let p12 =
-        { Coord = c
-          PointStatus = NotHit }
-
-    let c =
-        { X = 'A'
-          Y = 3 }
-    let p13 =
-        { Coord = c
-          PointStatus = NotHit }
-
-    let c =
-        { X = 'D'
-          Y = 4 }
-    let p14 =
-        { Coord = c
-          PointStatus = NotHit }
-
-    let ship11 =
-        { Points = [ p11; p12 ]
-          Status = Alive }
-
-    let ship12 =
-        { Points = [ p13; p14 ]
-          Status = Alive }
-
-    let ships = [ ship11; ship12 ]
-
-    ships
-
-
+open System
 
 // TODO: dummy implementation replace with ships created at random positions
-let createRandomShips() =
-    let c =
-        { X = 'A'
-          Y = 3 }
+let createRandomShip (size: int, rnd: Random, chars: char list) =
+    // ugly hack unless there is a google search result which provides an int->ASCII conversion function
 
-    let p21 =
-        { Coord = c
+    // TODO: if size = 5 are these valid coordinates?   0..4 ?
+    let x_rnd = rnd.Next(0, size)
+    let y_rnd = rnd.Next(0, size)
+
+    let c1 =
+        { X = chars.[x_rnd]
+          Y = y_rnd }
+
+    // N/E/S/W     :-)
+    let direction = rnd.Next(0, 4)
+
+    // create second point for the ship in either of these 4 directions
+    let c2 =
+        match direction with
+        | 1 ->
+            if y_rnd - 1 >= 0 then
+                // if possible go north
+                let c2 =
+                    { X = chars.[x_rnd]
+                      Y = y_rnd - 1 }
+                c2
+            else
+                // or else go south
+                let c2 =
+                    { X = chars.[x_rnd]
+                      Y = y_rnd + 1 }
+                c2
+        | 2 ->
+            if x_rnd - 1 >= 0 then
+                let c2 =
+                    { X = chars.[x_rnd - 1]
+                      Y = y_rnd }
+                c2
+            else
+                let c2 =
+                    { X = chars.[x_rnd + 1]
+                      Y = y_rnd }
+                c2
+        | 3 ->
+            if y_rnd + 1 >= 0 then
+                let c2 =
+                    { X = chars.[x_rnd]
+                      Y = y_rnd + 1 }
+                c2
+            else
+                let c2 =
+                    { X = chars.[x_rnd]
+                      Y = y_rnd - 1 }
+                c2
+        | 4 ->
+            if x_rnd + 1 >= 0 then
+                let c2 =
+                    { X = chars.[x_rnd + 1]
+                      Y = y_rnd }
+                c2
+            else
+                let c2 =
+                    { X = chars.[x_rnd - 1]
+                      Y = y_rnd }
+                c2
+        | _ -> failwith "our random logic is flawed"
+
+    let p1 =
+        { Coord = c1
           PointStatus = NotHit }
 
-    let c =
-        { X = 'C'
-          Y = 3 }
-    let p22 =
-        { Coord = c
+
+    let p2 =
+        { Coord = c2
           PointStatus = NotHit }
 
-    let c =
-        { X = 'E'
-          Y = 4 }
-    let p23 =
-        { Coord = c
-          PointStatus = NotHit }
-
-    let c =
-        { X = 'F'
-          Y = 4 }
-    let p24 =
-        { Coord = c
-          PointStatus = NotHit }
-
-
-    let ship21 =
-        { Points = [ p21; p22 ]
+    let ship =
+        { Points = [ p1; p2 ]
           Status = Alive }
 
-    let ship22 =
-        { Points = [ p23; p24 ]
-          Status = Alive }
+    ship
 
-    let ships = [ ship21; ship22 ]
+
+let createRandomShips (size: int, rnd: Random) =
+    // ugly hack unless there is a google search result which provides an int->ASCII conversion function
+    let chars = [ 'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'; 'I'; 'J'; 'K'; 'L'; 'M'; 'N' ]
+
+    // TODO: check if ships touch or overlap!
+    let ship1 = createRandomShip (size, rnd, chars)
+    let ship2 = createRandomShip (size, rnd, chars)
+
+    let ships = [ ship1; ship2 ]
 
     ships

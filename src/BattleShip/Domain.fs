@@ -18,6 +18,11 @@ type Coord =
     { X: char
       Y: int }
 
+type CoordPair =
+    { c1: Coord
+      c2: Coord }
+
+
 type ShipPoint =
     { Coord: Coord
       PointStatus: ShipPointStatus }
@@ -45,16 +50,15 @@ type Player =
 type GameStatus =
     | WonBy of Player
     | Running
-
+    | SetupShips of int
 
 type Game =
-    { P1Board: Board
-      P2Board: Board
+    { HumanBoard: Board
+      ComputerBoard: Board
       Status: GameStatus
-      Turn: Player
       Size: int }
 
-let initNewGame (size: int, humanShips: Ship list, computerShips: Ship list): Game =
+let initNewGame (size: int, computerShips: Ship list): Game =
 
     let cntFields = size * size
 
@@ -73,7 +77,7 @@ let initNewGame (size: int, humanShips: Ship list, computerShips: Ship list): Ga
         { Fields = fieldList1
           Size = size
           ShipsDestroyed = 0
-          Ships = humanShips }
+          Ships = [] }
 
     let board2 =
         { Fields = fieldList2
@@ -82,78 +86,11 @@ let initNewGame (size: int, humanShips: Ship list, computerShips: Ship list): Ga
           Ships = computerShips }
 
     let g =
-        { P1Board = board1
-          P2Board = board2
-          Status = Running
-          Turn = Human
+        { HumanBoard = board1
+          ComputerBoard = board2
+          Status = SetupShips 1
           Size = size }
-
     g
-
-
-
-// convert a Field to a string
-let toString f: string =
-    match f with
-    | NotAttempted -> " "
-    | Attempted fs ->
-        match fs with
-        | Water -> "w"
-        | Hit -> "h"
-
-
-// http://www.fssnip.net/5u/title/String-explode-and-implode
-let implode (xs: string list) =
-    let sb = System.Text.StringBuilder(xs.Length)
-    xs |> List.iter (sb.Append >> ignore)
-    sb.ToString()
-
-let horizontallLine (size: int) =
-    let cnt = (size + 2) * 3
-
-    let line =
-        [ for a in 1 .. cnt do
-            yield "-" ]
-    implode line
-
-
-// TODO: man that's ugly
-let drawBoard (board: Board) =
-    // good old for loop and string concatenation    ¯\_(ツ)_/¯
-    let mutable lines = List.empty
-    lines <- List.append lines [ horizontallLine (board.Size) ]
-    for y = 0 to board.Size - 1 do
-        let idx = y * board.Size
-        let mutable l = []
-
-        let fields = board.Fields
-
-        for x = 0 to board.Size - 1 do
-            // why fields.[]   and not fields[]  it's a list, not an array?
-            let a = toString (fields.[idx + x])
-            let b = " | " + a
-            // append  list to list ¯\_(ツ)_/¯
-            l <- List.append l [ b ]
-        //
-        l <- List.append l [ " | " ]
-        let l1 = implode l
-        lines <- List.append lines [ l1 ]
-        lines <- List.append lines [ horizontallLine (board.Size) ]
-
-    // print to console
-    // https://stackoverflow.com/questions/2519458/f-how-to-print-full-list-console-writeline-prints-only-first-three-elements
-    //https://stackoverflow.com/questions/19469252/convert-integer-list-to-a-string
-    // printf("lines =   %A") lines.ToString
-    lines |> List.iter (fun x -> printfn "%s " x)
-
-let drawBoards (g: Game) =
-    printfn ("my board")
-    drawBoard (g.P1Board)
-    printfn ("")
-    printfn ("my attempts at the opponents board")
-    drawBoard (g.P2Board)
-    printfn ("")
-
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
 let hitOnBoard (board: Board, c: Coord) =
@@ -183,36 +120,79 @@ let tryHitAt (game: Game, c: Coord) =
     // we return the new game
     game
 
+
+// TODO: implement
+let isValidShipPair (cp: CoordPair) =
+    true
+
+
+// TODO: simply - a lot of duplicated code
+let setShipCoordinates (game: Game, cp: CoordPair) =
+    match game.Status with
+    | SetupShips 1 ->
+        let p1 =
+            { Coord = cp.c1
+              PointStatus = NotHit }
+
+        let p2 =
+            { Coord = cp.c2
+              PointStatus = NotHit }
+
+        let ship =
+            { Points = [ p1; p2 ]
+              Status = Alive }
+
+        let board =
+            { game.HumanBoard with
+                  Ships = [ ship ]
+                  ShipsDestroyed = 0 }
+
+        let new_game =
+            { game with
+                  HumanBoard = board
+                  Status = SetupShips 2 }
+
+        new_game
+
+    | SetupShips 2 ->
+        let p1 =
+            { Coord = cp.c1
+              PointStatus = NotHit }
+        let p2 =
+            { Coord = cp.c2
+              PointStatus = NotHit }
+
+        let ship =
+            { Points = [ p1; p2 ]
+              Status = Alive }
+
+        let ships = List.append game.HumanBoard.Ships [ ship ]
+        let board =
+            { game.HumanBoard with Ships = ships }
+        let new_game = { game with HumanBoard = board }
+        new_game
+
+    | _ -> game
+
+
 // the human has entered a coordinate -> try to find out if
 // it is a hit or not
-let set (game: Game, c: Coord) =
+let set (game: Game, cp: CoordPair) =
 
     // TODO: remove printfn
-    printfn ("set coord = %A") c
+    printfn ("set coord1 = %A") cp.c1
+    printfn ("set coord2 = %A") cp.c2
 
-    // TODO
-    // check if c is a valid coordinate depending on the size of the board
-    // otherwise do nothing and leave game.Turn
-
-    // update the fields and ships accordingly
-
-    // if it is a hit, then leave game.Turn as it is and the current player can try again
-    // if it is a miss; then switch game.Turn
-
-    // if it is the computers turn, then let the computer randomly choose an action
-
-
-
-    // we return the new game
-    game
+    if not (isValidShipPair cp) then game
+    else setShipCoordinates (game, cp)
 
 
 // Message is a command entered by the user
 type Message =
-    | Set of Coord
+    | Set of CoordPair
     | Try of Coord
 
 let update (msg: Message) (game: Game): Game =
     match msg with
-    | Set c -> set (game, c)
+    | Set cp -> set (game, cp)
     | Try c -> tryHitAt (game, c)
