@@ -14,9 +14,9 @@ let main argv =
     let rnd = System.Random()
 
     // let humanShips = Ships.readShipsFromHuman()
-    let randomComputerShips = Ships.createRandomShips(5, rnd)
+    let randomComputerShips = Ships.createRandomShips(size, rnd)
 
-    let game = Domain.initNewGame (5, randomComputerShips)
+    let game = DomainFunctions.initNewGame (size, randomComputerShips)
 
     ConsoleHelper.drawBoards(game)
 

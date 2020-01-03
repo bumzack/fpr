@@ -1,4 +1,5 @@
 module ConsoleHelper
+
 open Domain
 
 // convert a Field to a string
@@ -26,38 +27,61 @@ let horizontallLine (size: int) =
     implode line
 
 
-
+// https://stackoverflow.com/questions/42820232/f-convert-a-char-to-int
+// A == 1
+// B == 2 etc
+let inline charToInt c = int c - int 'A'
 
 // TODO: man that's ugly
-let drawShips (board: Board) =
-    // good old for loop and string concatenation    ¯\_(ツ)_/¯
+let drawShip (board: Board) =
+    let size_squared = board.Size * board.Size
+    let fields = [ 0 .. size_squared-1 ]
 
+    let mapCoordToIndex (sp: ShipPoint) =
+        let x = (charToInt sp.Coord.X)
+        let idx = (sp.Coord.Y-1) * board.Size + x
+        idx
 
-    let mutable lines = List.empty
-    lines <- List.append lines [ horizontallLine (board.Size) ]
-    for y = 0 to board.Size - 1 do
-        let idx = y * board.Size
-        let mutable l = []
+    let shipsPoints =
+            match board.Ships.Length with
+            | 0 -> []
+            | 1 -> board.Ships.[0].Points
+            | 2 -> List.append board.Ships.[0].Points  board.Ships.[1].Points
+            | _ -> failwith "too many ships"
 
-        let fields = board.Fields
+    if shipsPoints.Length > 0 then
 
-        for x = 0 to board.Size - 1 do
-            // why fields.[]   and not fields[]  it's a list, not an array?
-            let a = toString (fields.[idx + x])
-            let b = " | " + a
-            // append  list to list ¯\_(ツ)_/¯
-            l <- List.append l [ b ]
-        //
-        l <- List.append l [ " | " ]
-        let l1 = implode l
-        lines <- List.append lines [ l1 ]
+        let shipIndizes = List.map mapCoordToIndex shipsPoints
+        let shipIndizes = List.sort shipIndizes
+
+        let mapShips idx =
+            if List.contains idx shipIndizes then 's'
+            else ' '
+
+        let fieldsAsChars = List.map mapShips fields
+
+        // good old for loop and string concatenation    ¯\_(ツ)_/¯
+
+        let mutable lines = List.empty
         lines <- List.append lines [ horizontallLine (board.Size) ]
+        for y = 0 to board.Size - 1 do
+            let idx = y * board.Size
+            let mutable l = []
 
-    // print to console
-    // https://stackoverflow.com/questions/2519458/f-how-to-print-full-list-console-writeline-prints-only-first-three-elements
-    //https://stackoverflow.com/questions/19469252/convert-integer-list-to-a-string
-    // printf("lines =   %A") lines.ToString
-    lines |> List.iter (fun x -> printfn "%s " x)
+            for x = 0 to board.Size - 1 do
+                // why fields.[]   and not fields[]  it's a list, not an array?
+                // TODO: that's the only difference to drawBoards for a fields list
+                let a = fieldsAsChars.[idx + x].ToString()
+                let b = " | " + a
+                // append  list to list ¯\_(ツ)_/¯
+                l <- List.append l [ b ]
+            //
+            l <- List.append l [ " | " ]
+            let l1 = implode l
+            lines <- List.append lines [ l1 ]
+            lines <- List.append lines [ horizontallLine (board.Size) ]
+
+        lines |> List.iter (fun x -> printfn "%s " x)
 
 
 // TODO: man that's ugly
@@ -97,3 +121,10 @@ let drawBoards (g: Game) =
     drawBoard (g.ComputerBoard)
     printfn ("")
 
+let drawShips(g: Game) =
+    printfn ("human ships")
+    drawShip (g.HumanBoard)
+    printfn ("")
+    printfn ("computer ships")
+    drawShip (g.ComputerBoard)
+    printfn ("")

@@ -13,6 +13,7 @@ let read (input: string) =
     match input with
     | Set v -> Domain.Set v |> DomainMessage
     | Try v -> Domain.Try v |> DomainMessage
+    | ShowShips -> Domain.ShowShips |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed -> NotParsable input
 
@@ -26,14 +27,12 @@ let createHelpText(): string =
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
 
-
-
 let evaluate (update: Domain.Message -> Game -> Game) (game: Game) (msg: ReplMessage) =
     match msg with
     | DomainMessage msg ->
         let newState = update msg game
         // TODO: better msg - or remove - or ?!?
-        let message = "next try "
+        let message = "> "
         (newState, message)
     | HelpRequested ->
         let message = createHelpText()
@@ -53,9 +52,7 @@ let print (game: Game, outputToPrint: string) =
 let rec loop (game: Game) =
     Console.ReadLine()
     |> read
-    |> evaluate Domain.update game
+    |> evaluate DomainFunctions.update game
     |> print
     |> loop
-
-
 

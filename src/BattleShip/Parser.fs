@@ -26,7 +26,7 @@ let mapToCoordPair (x, y, x1, y1) =
 
 
 
-let (|Set|Try|Help|ParseFailed|) (input: string) =
+let (|Set|Try|ShowShips|Help|ParseFailed|) (input: string) =
     //    let tryParseInt (arg: string) valueConstructor =
     //        let (worked, arg') = Int32.TryParse arg
     //        if worked then valueConstructor arg'
@@ -62,6 +62,7 @@ let (|Set|Try|Help|ParseFailed|) (input: string) =
     match parts with
 
     | [ verb ] when safeEquals verb HelpLabel -> Help
+    | [ verb ] when safeEquals verb (nameof Domain.ShowShips) -> ShowShips
     | [ verb; arg ] when safeEquals verb (nameof Domain.Try) ->
         tryParseCoord arg (fun (x, y) -> Try  (mapToCoord (x,y)))
     | [ verb; arg1; arg2 ] when safeEquals verb (nameof Domain.Set) ->
