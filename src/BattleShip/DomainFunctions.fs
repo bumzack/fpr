@@ -9,6 +9,7 @@ let initNewGame (size: int, computerShips: Ship list): Game =
     let fieldList1 =
         [ for a in 1 .. cntFields do
             yield (NotAttempted) ]
+
     let fieldList2 =
         [ for a in 1 .. cntFields do
             yield (NotAttempted) ]
@@ -30,6 +31,7 @@ let initNewGame (size: int, computerShips: Ship list): Game =
           ComputerBoard = board2
           Status = SetupShips 1
           Size = size }
+
     g
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
@@ -37,13 +39,19 @@ let hitOnBoard (board: Board, c: Coord) =
     // or maybe even better a tuple (board, true) so the caller knows if there was a hit or not
     (board, true)
 
+let iterateShipPoints =
+    fun (c: Coord) (shipPoint: ShipPoint) ->
+        if shipPoint.Coord = c then
+            printfn "Hit"
+            { shipPoint with PointStatus = ShipHit }
+        else
+            shipPoint
+
+let iterateShips = fun (c: Coord) (ship: Ship) -> { ship with Points = List.map (iterateShipPoints c) ship.Points }
+
 // the human has entered a coordinate -> try to find out if
 // it is a hit or not
 let tryHitAt (game: Game, c: Coord) =
-
-    // TODO: remove printfn
-    printfn ("tryhitat coord = %A") c
-
     // TODO
     // check if c is a valid coordinate depending on the size of the board
     // otherwise do nothing
@@ -53,27 +61,28 @@ let tryHitAt (game: Game, c: Coord) =
     // if it is a hit  then return and the human can try again
     // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
 
-    // we return the new game
-    game
+    let newShips = List.map (iterateShips c) game.ComputerBoard.Ships
+    let newComputerBoard = { game.ComputerBoard with Ships = newShips }
+    let newGame = { game with ComputerBoard = newComputerBoard }
+    newGame
 
 
 // TODO: implement
-let isValidShipPair (cp: CoordPair) =
-    true
+let isValidShipPair (cp: CoordPair) = true
 
 
-let createShipFromCoordPair (cp: CoordPair ) =
+let createShipFromCoordPair (cp: CoordPair) =
     let p1 =
-            { Coord = cp.c1
-              PointStatus = NotHit }
+        { Coord = cp.c1
+          PointStatus = NotHit }
 
     let p2 =
-            { Coord = cp.c2
-              PointStatus = NotHit }
+        { Coord = cp.c2
+          PointStatus = NotHit }
 
     let ship =
-            { Points = [ p1; p2 ]
-              Status = Alive }
+        { Points = [ p1; p2 ]
+          Status = Alive }
 
     ship
 
@@ -82,6 +91,7 @@ let setShipCoordinates (game: Game, cp: CoordPair) =
     match game.Status with
     | SetupShips 1 ->
         let ship = createShipFromCoordPair cp
+
         let board =
             { game.HumanBoard with
                   Ships = [ ship ]
@@ -97,10 +107,12 @@ let setShipCoordinates (game: Game, cp: CoordPair) =
     | SetupShips 2 ->
         let ship = createShipFromCoordPair cp
         let ships = List.append game.HumanBoard.Ships [ ship ]
-        let board =
-            { game.HumanBoard with Ships = ships }
-        let new_game = { game with HumanBoard = board
-                                   Status = Running  }
+        let board = { game.HumanBoard with Ships = ships }
+
+        let new_game =
+            { game with
+                  HumanBoard = board
+                  Status = Running }
         new_game
 
     | _ -> game
@@ -108,7 +120,7 @@ let setShipCoordinates (game: Game, cp: CoordPair) =
 
 
 let showShips (game: Game) =
-    ConsoleHelper.drawShips(game)
+    ConsoleHelper.drawShips (game)
     game
 
 
@@ -116,11 +128,12 @@ let showShips (game: Game) =
 // it is a hit or not
 let set (game: Game, cp: CoordPair) =
     if not (isValidShipPair cp) then
-        printfn("this is not a valid pair of coordinates for a ship p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
-        printfn("please try again")
+        printfn ("this is not a valid pair of coordinates for a ship p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X
+            cp.c2.Y
+        printfn ("please try again")
         game
     else
-        printfn("added new ship at coord  p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
+        printfn ("added new ship at coord  p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
         setShipCoordinates (game, cp)
 
 let update (msg: Message) (game: Game): Game =
