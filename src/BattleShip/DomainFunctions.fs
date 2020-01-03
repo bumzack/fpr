@@ -1,7 +1,6 @@
 module DomainFunctions
 
 open Domain
-open ConsoleHelper
 
 let initNewGame (size: int, computerShips: Ship list): Game =
 
@@ -51,16 +50,12 @@ let tryHitAt (game: Game, c: Coord) =
 
     // TODO
     // check if c is a valid coordinate depending on the size of the board
-    // otherwise do nothing and leave game.Turn
+    // otherwise do nothing
 
     // update the fields and ships accordingly
 
-    // if it is a hit, then leave game.Turn as it is and the current player can try again
-    // if it is a miss; then switch game.Turn
-
-    // if it is the computers turn, then let the computer randomly choose an action
-
-
+    // if it is a hit  then return and the human can try again
+    // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
 
     // we return the new game
     game
