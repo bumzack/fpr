@@ -34,11 +34,6 @@ let initNewGame (size: int, computerShips: Ship list): Game =
 
     g
 
-// can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
-let hitOnBoard (board: Board, c: Coord) =
-    // or maybe even better a tuple (board, true) so the caller knows if there was a hit or not
-    (board, true)
-
 let iterateShipPoints =
     fun (c: Coord) (shipPoint: ShipPoint) ->
         if shipPoint.Coord = c then
@@ -47,7 +42,21 @@ let iterateShipPoints =
         else
             shipPoint
 
+let computerMove (humanBoard: Board): Coord =
+    // Find Unattempted Fields --> for this we will probably need to extend the Field Type with a Coord
+    // Randomly choose one of them and return its Coord
+    let coord =
+        { X = 'A'
+          Y = 1 }
+    coord
+
 let iterateShips = fun (c: Coord) (ship: Ship) -> { ship with Points = List.map (iterateShipPoints c) ship.Points }
+
+// can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
+let hitOnBoard (board: Board, c: Coord) =
+    let newShips = List.map (iterateShips c) board.Ships
+    let newBoard = { board with Ships = newShips }
+    newBoard
 
 // the human has entered a coordinate -> try to find out if
 // it is a hit or not
@@ -60,10 +69,13 @@ let tryHitAt (game: Game, c: Coord) =
 
     // if it is a hit  then return and the human can try again
     // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
+    let newComputerBoard = hitOnBoard (game.ComputerBoard, c)
+    let newHumanBoard = hitOnBoard (game.HumanBoard, c)
 
-    let newShips = List.map (iterateShips c) game.ComputerBoard.Ships
-    let newComputerBoard = { game.ComputerBoard with Ships = newShips }
-    let newGame = { game with ComputerBoard = newComputerBoard }
+    let newGame =
+        { game with
+              ComputerBoard = newComputerBoard
+              HumanBoard = newHumanBoard }
     newGame
 
 
