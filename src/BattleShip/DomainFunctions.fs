@@ -78,10 +78,34 @@ let tryHitAt (game: Game, c: Coord) =
               HumanBoard = newHumanBoard }
     newGame
 
+// Filter function for Coord value tuples
+let filterInvalidCoordTuples (gameSize: int) (coordTuple: int * int): bool =
+    match coordTuple with
+    | (x, y) when x >= 0 && y >= 1 && x < gameSize && y < gameSize + 1 -> true
+    | _ -> false
 
-// TODO: implement
-let isValidShipPair (cp: CoordPair) = true
+let mapValidCoordTuples (game: Game) (x: int, y: int): Coord =
+    let boardCharacterRange = Domain.getCharacterRangeForBoard game.HumanBoard
+    { X = boardCharacterRange.[x]
+      Y = y }
 
+// Check if CoordPair is valid
+let isValidShipPair (game: Game, coords: CoordPair) =
+    let boardCharacterRange = Domain.getCharacterRangeForBoard game.HumanBoard
+    let positionCharacter = coords.c1.X
+    let characterIndex = List.findIndex (fun element -> positionCharacter = element) boardCharacterRange
+    let positionInteger = coords.c1.Y
+
+    let allTuples =
+        [ (characterIndex, positionInteger - 1)
+          (characterIndex, positionInteger + 1)
+          (characterIndex - 1, positionInteger)
+          (characterIndex + 1, positionInteger) ]
+
+    allTuples
+    |> List.filter (filterInvalidCoordTuples game.Size)
+    |> List.map (mapValidCoordTuples game)
+    |> List.contains coords.c2
 
 let createShipFromCoordPair (cp: CoordPair) =
     let p1 =
@@ -142,7 +166,7 @@ let showShips (game: Game) =
 // the human has entered a coordinate -> try to find out if
 // it is a hit or not
 let set (game: Game, cp: CoordPair) =
-    if not (isValidShipPair cp) then
+    if not (isValidShipPair (game, cp)) then
         printfn ("this is not a valid pair of coordinates for a ship p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X
             cp.c2.Y
         printfn ("please try again")
