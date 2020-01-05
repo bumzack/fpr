@@ -2,129 +2,94 @@ module ConsoleHelper
 
 open Domain
 
-// convert a Field to a string
-let toString f: string =
-    match f with
+let fieldToString (field: Field): string =
+    match field with
     | NotAttempted -> " "
-    | Attempted fs ->
-        match fs with
+    | Attempted fieldStatus ->
+        match fieldStatus with
         | Water -> "w"
         | Hit -> "h"
 
-
-// http://www.fssnip.net/5u/title/String-explode-and-implode
-let implode (xs: string list) =
-    let sb = System.Text.StringBuilder(xs.Length)
-    xs |> List.iter (sb.Append >> ignore)
-    sb.ToString()
+let shipPointToString (shipPoint: ShipPoint): string =
+    match shipPoint.PointStatus with
+    | NotHit -> "o"
+    | ShipHit -> "x"
 
 let horizontallLine (size: int) =
     let cnt = (size + 2) * 3
+    String.replicate cnt "-"
 
-    let line =
-        [ for a in 1 .. cnt do
-            yield "-" ]
-    implode line
+// Draw the status of all Fields of a Board
+let drawFieldStatus (board: Board) =
+    let boardCharacterRange = Domain.getCharacterRangeForBoard board // Possible character values
+    let stringFields = List.map fieldToString board.Fields
 
+    printfn " "
+    printf "   "
+    for character in boardCharacterRange do
+        printf "  %c " character
+    printfn " "
 
-// https://stackoverflow.com/questions/42820232/f-convert-a-char-to-int
-// A == 1
-// B == 2 etc
-let inline charToInt c = int c - int 'A'
+    printfn "   %s" (horizontallLine (board.Size))
+    for i = 1 to board.Size do
+        printf " %i " i
+        for j = 1 to board.Size do
+            printf "| %s " stringFields.[i + j - 2]
+        printf "|\n"
+        printfn "   %s" (horizontallLine (board.Size))
 
-// TODO: man that's ugly
-let drawShip (board: Board) =
-    let size_squared = board.Size * board.Size
-    let fields = [ 0 .. size_squared-1 ]
+// Draw the status of all ShipPoints of a Board
+let drawShipPointStatus (board: Board) =
+    let boardCharacterRange = Domain.getCharacterRangeForBoard board // Possible character values
+    let boardShipPointCoords = Domain.getShipPointCoordsForBoards board // All existing ShipPoints
 
-    let mapCoordToIndex (sp: ShipPoint) =
-        let x = (charToInt sp.Coord.X)
-        let idx = (sp.Coord.Y-1) * board.Size + x
-        idx
+    printfn " "
+    printf "   "
+    for character in boardCharacterRange do
+        printf "  %c " character
+    printfn " "
 
-    let shipsPoints =
-            match board.Ships.Length with
-            | 0 -> []
-            | 1 -> board.Ships.[0].Points
-            | 2 -> List.append board.Ships.[0].Points  board.Ships.[1].Points
-            | _ -> failwith "too many ships"
+    printfn "   %s" (horizontallLine (board.Size))
+    for j = 1 to board.Size do
+        printf " %i " j
+        for i = 1 to board.Size do
+            let tempCoord =
+                { X = boardCharacterRange.[i - 1]
+                  Y = j }
 
-    if shipsPoints.Length > 0 then
+            let shipPointCoordExists = List.contains tempCoord boardShipPointCoords
 
-        let shipIndizes = List.map mapCoordToIndex shipsPoints
-        let shipIndizes = List.sort shipIndizes
+            match shipPointCoordExists with
+            | true ->
+                let shipPoint = Domain.getShipPointByCoordForBoard (tempCoord, board)
+                printf "| %s " (shipPointToString shipPoint)
+            | false -> printf "|   "
 
-        let mapShips idx =
-            if List.contains idx shipIndizes then 's'
-            else ' '
+        printf "|\n"
+        printfn "   %s" (horizontallLine (board.Size))
 
-        let fieldsAsChars = List.map mapShips fields
+// Draw the Field and ShipPoint status for the provided Board
+let drawBoardStatus (board: Board) =
+    drawShipPointStatus board
+    drawFieldStatus board
 
-        // good old for loop and string concatenation    ¯\_(ツ)_/¯
-
-        let mutable lines = List.empty
-        lines <- List.append lines [ horizontallLine (board.Size) ]
-        for y = 0 to board.Size - 1 do
-            let idx = y * board.Size
-            let mutable l = []
-
-            for x = 0 to board.Size - 1 do
-                // why fields.[]   and not fields[]  it's a list, not an array?
-                // TODO: that's the only difference to drawBoards for a fields list
-                let a = fieldsAsChars.[idx + x].ToString()
-                let b = " | " + a
-                // append  list to list ¯\_(ツ)_/¯
-                l <- List.append l [ b ]
-            //
-            l <- List.append l [ " | " ]
-            let l1 = implode l
-            lines <- List.append lines [ l1 ]
-            lines <- List.append lines [ horizontallLine (board.Size) ]
-
-        lines |> List.iter (fun x -> printfn "%s " x)
-
-
-// TODO: man that's ugly
-let drawBoard (board: Board) =
-    // good old for loop and string concatenation    ¯\_(ツ)_/¯
-    let mutable lines = List.empty
-    lines <- List.append lines [ horizontallLine (board.Size) ]
-    for y = 0 to board.Size - 1 do
-        let idx = y * board.Size
-        let mutable l = []
-
-        let fields = board.Fields
-
-        for x = 0 to board.Size - 1 do
-            // why fields.[]   and not fields[]  it's a list, not an array?
-            let a = toString (fields.[idx + x])
-            let b = " | " + a
-            // append  list to list ¯\_(ツ)_/¯
-            l <- List.append l [ b ]
-        //
-        l <- List.append l [ " | " ]
-        let l1 = implode l
-        lines <- List.append lines [ l1 ]
-        lines <- List.append lines [ horizontallLine (board.Size) ]
-
-    // print to console
-    // https://stackoverflow.com/questions/2519458/f-how-to-print-full-list-console-writeline-prints-only-first-three-elements
-    //https://stackoverflow.com/questions/19469252/convert-integer-list-to-a-string
-    // printf("lines =   %A") lines.ToString
-    lines |> List.iter (fun x -> printfn "%s " x)
+let drawShips (g: Game) =
+    printfn ""
+    printfn "   You"
+    drawFieldStatus g.HumanBoard
+    drawShipPointStatus g.HumanBoard
+    printfn ""
+    printfn "   Opponent"
+    drawFieldStatus g.ComputerBoard
+    drawShipPointStatus g.ComputerBoard
+    printfn ""
 
 let drawBoards (g: Game) =
-    printfn ("my board")
-    drawBoard (g.HumanBoard)
-    printfn ("")
-    printfn ("my attempts at the opponents board")
-    drawBoard (g.ComputerBoard)
-    printfn ("")
-
-let drawShips(g: Game) =
-    printfn ("human ships")
-    drawShip (g.HumanBoard)
-    printfn ("")
-    printfn ("computer ships")
-    drawShip (g.ComputerBoard)
-    printfn ("")
+    printfn ""
+    printfn "   You"
+    drawFieldStatus g.HumanBoard
+    drawShipPointStatus g.HumanBoard
+    printfn ""
+    printfn "   Opponent"
+    drawFieldStatus g.ComputerBoard
+    printfn ""

@@ -113,9 +113,12 @@ let setShipCoordinates (game: Game, cp: CoordPair) =
             { game with
                   HumanBoard = board
                   Status = Running }
+        ConsoleHelper.drawBoards new_game
         new_game
 
-    | _ -> game
+    | _ ->
+        ConsoleHelper.drawBoards game
+        game
 
 
 
@@ -133,7 +136,7 @@ let set (game: Game, cp: CoordPair) =
         printfn ("please try again")
         game
     else
-        printfn ("added new ship at coord  p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
+        printfn ("Added new ship at coord  p1 = %c%d, p2 = %c%d") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
         setShipCoordinates (game, cp)
 
 let update (msg: Message) (game: Game): Game =
