@@ -10,8 +10,9 @@ let main argv =
 
     let game = DomainFunctions.initNewGame 5
 
+    printfn ""
     printfn "   Please choose where you want to put your ships"
-    printfn "   (e.g.: Set A1 A2)"
+    printfn "   (e.g.: Set A1)"
     printfn ""
     ConsoleHelper.drawFieldStatus game.HumanBoard
     printfn ""
