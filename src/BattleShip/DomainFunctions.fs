@@ -95,30 +95,19 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
         printfn "The given coordinate is not valid!"
         game
 
-// TODO: simply - a lot of duplicated code
+// Set a new ShipPoint on board
 let setShipPoint (game: Game, coord: Coord): Game =
     match game.Status with
-    | SetupShips 1 ->
+    | SetupShips value when value <= 3 ->
         let newGame =
             { game with
                   HumanBoard =
                       addShipPointToBoard
                           ({ Coord = coord
                              PointStatus = NotHit }, game.HumanBoard)
-                  Status = SetupShips 2 }
+                  Status = SetupShips(value + 1) }
 
-        ConsoleHelper.drawBoards newGame
-        newGame
-    | SetupShips 2 ->
-        let newGame =
-            { game with
-                  HumanBoard =
-                      addShipPointToBoard
-                          ({ Coord = coord
-                             PointStatus = NotHit }, game.HumanBoard)
-                  Status = SetupShips 3 }
-
-        ConsoleHelper.drawBoards newGame
+        ConsoleHelper.drawShipPointStatus newGame.HumanBoard
         newGame
     | SetupShips 3 ->
         let newGame =
@@ -150,7 +139,7 @@ let showShips (game: Game) =
     ConsoleHelper.drawShips (game)
     game
 
-// Human player sets new ShipPoints a provided CoordPair if CoordPair is valid
+// Human player sets new ShipPoints on the provided Coord
 let set (game: Game, coord: Coord): Game =
     if (isValidGameCoord (game, coord)) then
         printfn ("New ship at %c%d") coord.X coord.Y
