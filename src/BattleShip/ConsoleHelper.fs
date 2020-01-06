@@ -92,8 +92,8 @@ let drawShips (g: Game) =
 let drawBoards (g: Game) =
     printfn ""
     printfn "   You"
-    drawFieldStatus g.HumanBoard
     drawShipPointStatus g.HumanBoard
+    drawFieldStatus g.HumanBoard
     printfn ""
     printfn "   Opponent"
     drawFieldStatus g.ComputerBoard

@@ -36,7 +36,7 @@ let computerMove (humanBoard: Board): Coord =
     notAttemptedFields.[randomNumber].Coord
 
 let iterateShipPoints (coord: Coord) (shipPoint: ShipPoint) =
-    match shipPoint.Coord = coord with
+    match shipPoint.Coord = coord && shipPoint.PointStatus = NotHit with
     | true -> { shipPoint with PointStatus = ShipHit }
     | false -> shipPoint
 
@@ -70,6 +70,7 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
                   ComputerBoard = newComputerBoard
                   HumanBoard = newHumanBoard }
 
+        System.Console.Clear()
         ConsoleHelper.drawBoards newGame
 
         newGame
@@ -90,6 +91,9 @@ let setShipPoint (game: Game, coord: Coord): Game =
                              PointStatus = NotHit }, game.HumanBoard)
                   Status = SetupShips(value + 1) }
 
+        System.Console.Clear()
+        printfn ""
+        printfn "   You"
         ConsoleHelper.drawShipPointStatus newGame.HumanBoard
         newGame
     | SetupShips 3 ->
@@ -101,6 +105,7 @@ let setShipPoint (game: Game, coord: Coord): Game =
                              PointStatus = NotHit }, game.HumanBoard)
                   Status = SetupShips 4 }
 
+        System.Console.Clear()
         ConsoleHelper.drawBoards newGame
         newGame
     | SetupShips 4 ->
@@ -112,6 +117,7 @@ let setShipPoint (game: Game, coord: Coord): Game =
                              PointStatus = NotHit }, game.HumanBoard)
                   Status = Running }
 
+        System.Console.Clear()
         ConsoleHelper.drawBoards newGame
         newGame
     | _ ->
