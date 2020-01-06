@@ -67,6 +67,10 @@ let getShipPointsForBoard (board: Board): List<ShipPoint> = board.Ships.[0].Poin
 let getShipPointCoordsForBoard (board: Board): List<Coord> =
     (getShipPointsForBoard board) |> List.map shipPointToCoord
 
+// Check if the provided board has a ShipPoint at the provided Coord
+let boardHasShipPointAtCoord (board: Board, coord: Coord): bool =
+    getShipPointCoordsForBoard board |> List.contains coord
+
 // Return ShipPoint with the provided Coord from the provided Board
 let getShipPointByCoordForBoard (coord: Coord, board: Board): ShipPoint =
     List.find (shipPointHasCoord coord) (getShipPointsForBoard board)
@@ -88,6 +92,42 @@ type Game =
       ComputerBoard: Board
       Status: GameStatus
       Size: int }
+
+// Check if the provided coordinate is even on the board
+let isValidGameCoord (game: Game, coord: Coord): bool =
+    let isValidBoardCharacter = getCharacterRange game.Size |> List.contains coord.X
+    let isValidBoardInteger = coord.Y >= 1 && coord.Y <= game.Size
+    isValidBoardInteger && isValidBoardCharacter
+
+// Filter function for Coord value tuples
+let filterInvalidCoordTuples (gameSize: int) (coordTuple: int * int): bool =
+    match coordTuple with
+    | (x, y) when x >= 0 && y >= 1 && x < gameSize && y < gameSize + 1 -> true
+    | _ -> false
+
+// Map Coord value Tuple to Coord
+let mapValidCoordTuples (game: Game) (x: int, y: int): Coord =
+    let boardCharacterRange = getCharacterRangeForBoard game.HumanBoard
+    { X = boardCharacterRange.[x]
+      Y = y }
+
+// Check if CoordPair is valid
+let isValidShipPair (game: Game, coords: CoordPair) =
+    let boardCharacterRange = getCharacterRangeForBoard game.HumanBoard
+    let positionCharacter = coords.c1.X
+    let characterIndex = List.findIndex (fun element -> positionCharacter = element) boardCharacterRange
+    let positionInteger = coords.c1.Y
+
+    let allTuples =
+        [ (characterIndex, positionInteger - 1)
+          (characterIndex, positionInteger + 1)
+          (characterIndex - 1, positionInteger)
+          (characterIndex + 1, positionInteger) ]
+
+    allTuples
+    |> List.filter (filterInvalidCoordTuples game.Size)
+    |> List.map (mapValidCoordTuples game)
+    |> List.contains coords.c2
 
 // Message is a command entered by the user
 type Message =

@@ -2,6 +2,7 @@ module ConsoleHelper
 
 open Domain
 
+// String representation of a Field
 let fieldToString (field: Field): string =
     match field.AttemptStatus with
     | NotAttempted -> " "
@@ -10,18 +11,20 @@ let fieldToString (field: Field): string =
         | Water -> "w"
         | Hit -> "h"
 
+// String representation of a ShipPoint
 let shipPointToString (shipPoint: ShipPoint): string =
     match shipPoint.PointStatus with
     | NotHit -> "o"
     | ShipHit -> "x"
 
+// Horizontal Line output
 let horizontallLine (size: int) =
     let cnt = (size + 2) * 3
     String.replicate cnt "-"
 
 // Draw the status of all Fields of a Board
 let drawFieldStatus (board: Board) =
-    let boardCharacterRange = Domain.getCharacterRangeForBoard board // Possible character values
+    let boardCharacterRange = getCharacterRangeForBoard board // Possible character values
     let stringFields = List.map fieldToString board.Fields
 
     printfn " "
@@ -40,8 +43,8 @@ let drawFieldStatus (board: Board) =
 
 // Draw the status of all ShipPoints of a Board
 let drawShipPointStatus (board: Board) =
-    let boardCharacterRange = Domain.getCharacterRangeForBoard board // Possible character values
-    let boardShipPointCoords = Domain.getShipPointCoordsForBoard board // All existing ShipPoints
+    let boardCharacterRange = getCharacterRangeForBoard board // Possible character values
+    let boardShipPointCoords = getShipPointCoordsForBoard board // All existing ShipPoints
 
     printfn " "
     printf "   "
@@ -61,7 +64,7 @@ let drawShipPointStatus (board: Board) =
 
             match shipPointCoordExists with
             | true ->
-                let shipPoint = Domain.getShipPointByCoordForBoard (tempCoord, board)
+                let shipPoint = getShipPointByCoordForBoard (tempCoord, board)
                 printf "| %s " (shipPointToString shipPoint)
             | false -> printf "|   "
 
@@ -73,6 +76,7 @@ let drawBoardStatus (board: Board) =
     drawShipPointStatus board
     drawFieldStatus board
 
+// Used for ShowShips command
 let drawShips (g: Game) =
     printfn ""
     printfn "   You"
@@ -84,6 +88,7 @@ let drawShips (g: Game) =
     drawShipPointStatus g.ComputerBoard
     printfn ""
 
+// Draw game status after every move
 let drawBoards (g: Game) =
     printfn ""
     printfn "   You"

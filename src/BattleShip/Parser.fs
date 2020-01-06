@@ -9,19 +9,16 @@ let safeEquals (it: string) (theOther: string) = String.Equals(it, theOther, Str
 let HelpLabel = "Help"
 
 let mapToCoord (x, y) =
-    let c: Domain.Coord =
-        { X = x
-          Y = y }
-    c
+    { X = x
+      Y = y }
 
 let mapToCoordPair (x, y, x1, y1) =
     let c1 = mapToCoord (x, y)
-    let c2= mapToCoord (x1, y1)
+    let c2 = mapToCoord (x1, y1)
 
-    let cp :CoordPair = {
-        c1 = c1
-        c2 = c2
-    }
+    let cp: CoordPair =
+        { c1 = c1
+          c2 = c2 }
     cp
 
 
@@ -64,7 +61,7 @@ let (|Set|Try|ShowShips|Help|ParseFailed|) (input: string) =
     | [ verb ] when safeEquals verb HelpLabel -> Help
     | [ verb ] when safeEquals verb (nameof Domain.ShowShips) -> ShowShips
     | [ verb; arg ] when safeEquals verb (nameof Domain.Try) ->
-        tryParseCoord arg (fun (x, y) -> Try  (mapToCoord (x,y)))
+        tryParseCoord arg (fun (x, y) -> Try(mapToCoord (x, y)))
     | [ verb; arg1; arg2 ] when safeEquals verb (nameof Domain.Set) ->
-        tryParseCoordPair (arg1 , arg2) (fun (x, y, x1, y1) -> Set (mapToCoordPair (x,y, x1,y1)))
+        tryParseCoordPair (arg1, arg2) (fun (x, y, x1, y1) -> Set(mapToCoordPair (x, y, x1, y1)))
     | _ -> ParseFailed
