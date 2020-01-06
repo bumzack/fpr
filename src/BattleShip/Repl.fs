@@ -31,8 +31,7 @@ let evaluate (update: Domain.Message -> Game -> Game) (game: Game) (msg: ReplMes
     match msg with
     | DomainMessage msg ->
         let newState = update msg game
-        // TODO: better msg - or remove - or ?!?
-        let message = "> "
+        let message = ""
         (newState, message)
     | HelpRequested ->
         let message = createHelpText()
@@ -45,8 +44,6 @@ let evaluate (update: Domain.Message -> Game -> Game) (game: Game) (msg: ReplMes
 
 let print (game: Game, outputToPrint: string) =
     printfn "%s\n" outputToPrint
-    printf "> "
-
     game
 
 let rec loop (game: Game) =
@@ -55,4 +52,3 @@ let rec loop (game: Game) =
     |> evaluate DomainFunctions.update game
     |> print
     |> loop
-
