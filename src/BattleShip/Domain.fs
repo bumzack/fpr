@@ -64,7 +64,7 @@ let getCharacterRangeForBoard (board: Board): List<char> = [ 'A' .. 'Z' ].[0..(b
 let getShipPointsForBoard (board: Board): List<ShipPoint> = board.Ships.[0].Points @ board.Ships.[1].Points
 
 // Get list of all Coord for all ShipPoints of provided board
-let getShipPointCoordsForBoards (board: Board): List<Coord> =
+let getShipPointCoordsForBoard (board: Board): List<Coord> =
     (getShipPointsForBoard board) |> List.map shipPointToCoord
 
 // Return ShipPoint with the provided Coord from the provided Board

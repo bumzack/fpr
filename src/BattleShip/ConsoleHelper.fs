@@ -41,7 +41,7 @@ let drawFieldStatus (board: Board) =
 // Draw the status of all ShipPoints of a Board
 let drawShipPointStatus (board: Board) =
     let boardCharacterRange = Domain.getCharacterRangeForBoard board // Possible character values
-    let boardShipPointCoords = Domain.getShipPointCoordsForBoards board // All existing ShipPoints
+    let boardShipPointCoords = Domain.getShipPointCoordsForBoard board // All existing ShipPoints
 
     printfn " "
     printf "   "
