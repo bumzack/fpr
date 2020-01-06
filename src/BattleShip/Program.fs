@@ -1,6 +1,4 @@
-﻿open System
-
-[<EntryPoint>]
+﻿[<EntryPoint>]
 let main argv =
 
     printfn ""
@@ -10,14 +8,7 @@ let main argv =
     printfn "   ================================="
     printfn ""
 
-    let size = 5
-    // initialize in Main to avoid duplicates         https://stackoverflow.com/questions/6062191/f-getting-a-list-of-random-numbers
-    let rnd = System.Random()
-
-    // let humanShips = Ships.readShipsFromHuman()
-    let randomComputerShips = Ships.createRandomShips(size, rnd)
-
-    let game = DomainFunctions.initNewGame (size, randomComputerShips)
+    let game = DomainFunctions.initNewGame 5
 
     printfn "   Please choose where you want to put your ships"
     printfn "   (e.g.: Set A1 A2)"

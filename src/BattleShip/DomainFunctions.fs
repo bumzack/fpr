@@ -1,33 +1,30 @@
 module DomainFunctions
 
 open Domain
+open Ships
 
-let initNewGame (size: int, computerShips: Ship list): Game =
+let initNewGame (size: int): Game =
     let coordCharacters = getCharacterRange size
+    let computerShips = createRandomShips (size)
 
-    let newCoordList =
+    let newFieldList =
         [ for character in coordCharacters do
             for i in 1 .. size ->
                 { X = character
                   Y = i } ]
-
-    let newFieldList = newCoordList |> List.map createNewFieldFromCoord
-
-    let board1 =
-        { Fields = newFieldList
-          Size = size
-          ShipsDestroyed = 0
-          Ships = [] }
-
-    let board2 =
-        { Fields = newFieldList
-          Size = size
-          ShipsDestroyed = 0
-          Ships = computerShips }
+        |> List.map (fun coord ->
+            { Coord = coord
+              AttemptStatus = NotAttempted })
 
     let g =
-        { HumanBoard = board1
-          ComputerBoard = board2
+        { HumanBoard =
+              { Fields = newFieldList
+                Size = size
+                ShipPoints = [] }
+          ComputerBoard =
+              { Fields = newFieldList
+                Size = size
+                ShipPoints = computerShips }
           Status = SetupShips 1
           Size = size }
 
@@ -40,36 +37,36 @@ let computerMove (humanBoard: Board): Coord =
     let randomNumber = randomNumberGenerator.Next(0, notAttemptedFields.Length)
     notAttemptedFields.[randomNumber].Coord
 
-let iterateShipPoints (c: Coord) (shipPoint: ShipPoint) =
-    if shipPoint.Coord = c then
+let iterateShipPoints (coord: Coord) (shipPoint: ShipPoint) =
+    if shipPoint.Coord = coord then
         printfn "Hit"
         { shipPoint with PointStatus = ShipHit }
     else
         shipPoint
 
-let iterateShips (c: Coord) (ship: Ship): Ship = { ship with Points = List.map (iterateShipPoints c) ship.Points }
-
 let iterateFields (board: Board, coord: Coord) (field: Field): Field =
     if field.Coord = coord && field.AttemptStatus = NotAttempted then
         match boardHasShipPointAtCoord (board, coord) with
         | true ->
+            let newAttemptStatus = Attempted Hit
             printfn "Hit"
-            { field with AttemptStatus = Attempted Hit }
+            { field with AttemptStatus = newAttemptStatus }
         | false ->
+            let newAttemptStatus = Attempted Water
             printfn "Water"
-            { field with AttemptStatus = Attempted Water }
+            { field with AttemptStatus = newAttemptStatus }
     else
         field
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
 let hitOnBoard (board: Board, c: Coord) =
-    let newShips = board.Ships |> List.map (iterateShips c)
+    let newShipPoints = board.ShipPoints |> List.map (iterateShipPoints c)
 
     let newFields = board.Fields |> List.map (iterateFields (board, c))
 
     let newBoard =
         { board with
-              Ships = newShips
+              ShipPoints = newShipPoints
               Fields = newFields }
 
     newBoard
@@ -98,51 +95,53 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
         printfn "The given coordinate is not valid!"
         game
 
-let createShipFromCoordPair (cp: CoordPair) =
-    let p1 =
-        { Coord = cp.c1
-          PointStatus = NotHit }
-
-    let p2 =
-        { Coord = cp.c2
-          PointStatus = NotHit }
-
-    let ship =
-        { Points = [ p1; p2 ]
-          Status = Alive }
-
-    ship
-
 // TODO: simply - a lot of duplicated code
-let setShipCoordinates (game: Game, cp: CoordPair) =
+let setShipPoint (game: Game, coord: Coord): Game =
     match game.Status with
     | SetupShips 1 ->
-        let ship = createShipFromCoordPair cp
-
-        let board =
-            { game.HumanBoard with
-                  Ships = [ ship ]
-                  ShipsDestroyed = 0 }
-
-        let new_game =
+        let newGame =
             { game with
-                  HumanBoard = board
+                  HumanBoard =
+                      addShipPointToBoard
+                          ({ Coord = coord
+                             PointStatus = NotHit }, game.HumanBoard)
                   Status = SetupShips 2 }
 
-        new_game
-
+        ConsoleHelper.drawBoards newGame
+        newGame
     | SetupShips 2 ->
-        let ship = createShipFromCoordPair cp
-        let ships = List.append game.HumanBoard.Ships [ ship ]
-        let board = { game.HumanBoard with Ships = ships }
-
-        let new_game =
+        let newGame =
             { game with
-                  HumanBoard = board
-                  Status = Running }
-        ConsoleHelper.drawBoards new_game
-        new_game
+                  HumanBoard =
+                      addShipPointToBoard
+                          ({ Coord = coord
+                             PointStatus = NotHit }, game.HumanBoard)
+                  Status = SetupShips 3 }
 
+        ConsoleHelper.drawBoards newGame
+        newGame
+    | SetupShips 3 ->
+        let newGame =
+            { game with
+                  HumanBoard =
+                      addShipPointToBoard
+                          ({ Coord = coord
+                             PointStatus = NotHit }, game.HumanBoard)
+                  Status = SetupShips 4 }
+
+        ConsoleHelper.drawBoards newGame
+        newGame
+    | SetupShips 4 ->
+        let newGame =
+            { game with
+                  HumanBoard =
+                      addShipPointToBoard
+                          ({ Coord = coord
+                             PointStatus = NotHit }, game.HumanBoard)
+                  Status = Running }
+
+        ConsoleHelper.drawBoards newGame
+        newGame
     | _ ->
         ConsoleHelper.drawBoards game
         game
@@ -152,17 +151,17 @@ let showShips (game: Game) =
     game
 
 // Human player sets new ShipPoints a provided CoordPair if CoordPair is valid
-let set (game: Game, cp: CoordPair) =
-    if (isValidGameCoord (game, cp.c1)) && (isValidGameCoord (game, cp.c2)) && (isValidShipPair (game, cp)) then
-        printfn ("New ship at (%c%d, %c%d)") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
-        setShipCoordinates (game, cp)
+let set (game: Game, coord: Coord): Game =
+    if (isValidGameCoord (game, coord)) then
+        printfn ("New ship at %c%d") coord.X coord.Y
+        setShipPoint (game, coord)
     else
-        printfn ("Invalid coordinates (%c%d, %c%d)") cp.c1.X cp.c1.Y cp.c2.X cp.c2.Y
+        printfn ("Invalid coordinate %c%d") coord.X coord.Y
         printfn ("Try again!")
         game
 
 let update (msg: Message) (game: Game): Game =
     match msg with
-    | Set cp -> set (game, cp)
+    | Set c -> set (game, c)
     | Try c -> tryHitAt (game, c)
     | ShowShips -> showShips (game)
