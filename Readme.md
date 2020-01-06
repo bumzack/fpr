@@ -19,3 +19,7 @@ Execute the following command.
 ```bash
 dotnet run --project src/BattleShip/BattleShip.fsproj
 ```
+
+## ToDo
+Spiel gewonnen
+Try --> update passt nicht
