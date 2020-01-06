@@ -30,14 +30,6 @@ type ShipPoint =
 // Check if ShipPoint has givenn Coord
 let shipPointHasCoord (coord: Coord) (shipPoint: ShipPoint) = shipPoint.Coord = coord
 
-type ShipStatus =
-    | Alive
-    | Destroyed
-
-type Ship =
-    { Points: ShipPoint list
-      Status: ShipStatus }
-
 type Board =
     { Fields: Field list
       Size: int
