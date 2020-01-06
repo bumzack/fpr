@@ -24,7 +24,7 @@ let horizontallLine (size: int) =
 
 // Draw the status of all Fields of a Board
 let drawFieldStatus (board: Board) =
-    let boardCharacterRange = getCharacterRangeForBoard board // Possible character values
+    let boardCharacterRange = getCharacterRange board.Size // Possible character values
     let stringFields = List.map fieldToString board.Fields
 
     printfn " "
@@ -43,7 +43,7 @@ let drawFieldStatus (board: Board) =
 
 // Draw the status of all ShipPoints of a Board
 let drawShipPointStatus (board: Board) =
-    let boardCharacterRange = getCharacterRangeForBoard board // Possible character values
+    let boardCharacterRange = getCharacterRange board.Size // Possible character values
     let boardShipPointCoords = getShipPointCoordsForBoard board // All existing ShipPoints
 
     printfn " "

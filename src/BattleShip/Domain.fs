@@ -45,7 +45,6 @@ type Board =
 
 // Get character Range for provided board
 let getCharacterRange (length: int): List<char> = [ 'A' .. 'Z' ].[0..(length - 1)]
-let getCharacterRangeForBoard (board: Board): List<char> = [ 'A' .. 'Z' ].[0..(board.Size - 1)]
 
 // Get list of all Coord for all ShipPoints of provided board
 let getShipPointCoordsForBoard (board: Board): List<Coord> =
@@ -96,7 +95,7 @@ let filterInvalidCoordTuples (gameSize: int) (coordTuple: int * int): bool =
 
 // Map Coord value Tuple to Coord
 let mapValidCoordTuples (game: Game) (x: int, y: int): Coord =
-    let boardCharacterRange = getCharacterRangeForBoard game.HumanBoard
+    let boardCharacterRange = getCharacterRange game.Size
     { X = boardCharacterRange.[x]
       Y = y }
 
