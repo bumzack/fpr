@@ -5,15 +5,9 @@ type FieldStatus =
     | Water
     | Hit
 
-// field is one of field on the 5x5 board
-type Field =
+type FieldAttemptStatus =
     | NotAttempted
     | Attempted of FieldStatus
-
-// a ship consists of 2 or more points which can be either Hit or not hit
-type ShipPointStatus =
-    | NotHit
-    | ShipHit
 
 type Coord =
     { X: char
@@ -23,6 +17,20 @@ type CoordPair =
     { c1: Coord
       c2: Coord }
 
+// field is one of field on the 5x5 board
+type Field =
+    { Coord: Coord
+      AttemptStatus: FieldAttemptStatus }
+
+// Create a new Field from the provided Coord
+let createNewFieldFromCoord (coord: Coord): Field =
+    { Coord = coord
+      AttemptStatus = NotAttempted }
+
+// a ship consists of 2 or more points which can be either Hit or not hit
+type ShipPointStatus =
+    | NotHit
+    | ShipHit
 
 type ShipPoint =
     { Coord: Coord
@@ -49,6 +57,7 @@ type Board =
       Ships: Ship list }
 
 // Get character Range for provided board
+let getCharacterRange (length: int): List<char> = [ 'A' .. 'Z' ].[0..(length - 1)]
 let getCharacterRangeForBoard (board: Board): List<char> = [ 'A' .. 'Z' ].[0..(board.Size - 1)]
 
 // Get a list of all shipPoints for the given board
@@ -61,6 +70,9 @@ let getShipPointCoordsForBoards (board: Board): List<Coord> =
 // Return ShipPoint with the provided Coord from the provided Board
 let getShipPointByCoordForBoard (coord: Coord, board: Board): ShipPoint =
     List.find (shipPointHasCoord coord) (getShipPointsForBoard board)
+
+let getNotAttemptedFieldsForBoard (board: Board): List<Field> =
+    board.Fields |> List.filter (fun field -> field.AttemptStatus = NotAttempted)
 
 type Player =
     | Human

@@ -3,7 +3,7 @@ module ConsoleHelper
 open Domain
 
 let fieldToString (field: Field): string =
-    match field with
+    match field.AttemptStatus with
     | NotAttempted -> " "
     | Attempted fieldStatus ->
         match fieldStatus with

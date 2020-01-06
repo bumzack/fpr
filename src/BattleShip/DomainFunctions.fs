@@ -3,25 +3,24 @@ module DomainFunctions
 open Domain
 
 let initNewGame (size: int, computerShips: Ship list): Game =
+    let coordCharacters = Domain.getCharacterRange size
 
-    let cntFields = size * size
+    let newCoordList =
+        [ for character in coordCharacters do
+            for i in 1 .. size ->
+                { X = character
+                  Y = i } ]
 
-    let fieldList1 =
-        [ for a in 1 .. cntFields do
-            yield (NotAttempted) ]
-
-    let fieldList2 =
-        [ for a in 1 .. cntFields do
-            yield (NotAttempted) ]
+    let newFieldList = newCoordList |> List.map Domain.createNewFieldFromCoord
 
     let board1 =
-        { Fields = fieldList1
+        { Fields = newFieldList
           Size = size
           ShipsDestroyed = 0
           Ships = [] }
 
     let board2 =
-        { Fields = fieldList2
+        { Fields = newFieldList
           Size = size
           ShipsDestroyed = 0
           Ships = computerShips }
@@ -44,11 +43,13 @@ let iterateShipPoints =
 
 let computerMove (humanBoard: Board): Coord =
     // Find Unattempted Fields --> for this we will probably need to extend the Field Type with a Coord
-    // Randomly choose one of them and return its Coord
-    let coord =
-        { X = 'A'
-          Y = 1 }
-    coord
+    let notAttemptedFields = Domain.getNotAttemptedFieldsForBoard humanBoard
+    let randomNumberGenerator = System.Random()
+    let randomNumber = randomNumberGenerator.Next(0, notAttemptedFields.Length)
+
+    printfn "%A" notAttemptedFields
+
+    notAttemptedFields.[randomNumber].Coord
 
 let iterateShips = fun (c: Coord) (ship: Ship) -> { ship with Points = List.map (iterateShipPoints c) ship.Points }
 
@@ -70,7 +71,11 @@ let tryHitAt (game: Game, c: Coord) =
     // if it is a hit  then return and the human can try again
     // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
     let newComputerBoard = hitOnBoard (game.ComputerBoard, c)
-    let newHumanBoard = hitOnBoard (game.HumanBoard, c)
+    let computerMoveCoord = computerMove game.HumanBoard
+
+    printfn "%A" computerMoveCoord
+
+    let newHumanBoard = hitOnBoard (game.HumanBoard, computerMoveCoord)
 
     let newGame =
         { game with
@@ -84,6 +89,7 @@ let filterInvalidCoordTuples (gameSize: int) (coordTuple: int * int): bool =
     | (x, y) when x >= 0 && y >= 1 && x < gameSize && y < gameSize + 1 -> true
     | _ -> false
 
+// Map Coord value Tuple to Coord
 let mapValidCoordTuples (game: Game) (x: int, y: int): Coord =
     let boardCharacterRange = Domain.getCharacterRangeForBoard game.HumanBoard
     { X = boardCharacterRange.[x]

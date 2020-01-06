@@ -3,6 +3,7 @@
 [<EntryPoint>]
 let main argv =
 
+    printfn ""
     printfn "   ================================="
     printfn "   Welcome to BattleShip!"
     printfn "   Press CTRL+C to stop the program."
