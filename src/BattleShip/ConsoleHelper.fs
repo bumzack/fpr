@@ -3,98 +3,93 @@ module ConsoleHelper
 open Domain
 
 // String representation of a Field
-let fieldToString (field: Field): string =
+let fieldToAttemptStatus (field: Field): string =
     match field.AttemptStatus with
     | NotAttempted -> " "
-    | Attempted fieldStatus ->
-        match fieldStatus with
-        | Water -> "w"
-        | Hit -> "h"
+    | Attempted ->
+        match field.ShipStatus with
+        | Water -> "~"
+        | Ship -> "o"
+        | DestroyedShip -> "x"
 
-// String representation of a ShipPoint
-let shipPointToString (shipPoint: ShipPoint): string =
-    match shipPoint.PointStatus with
-    | NotHit -> "o"
-    | ShipHit -> "x"
+let fieldToShipStatus (field: Field): string =
+    match field.ShipStatus with
+    | Water -> " "
+    | Ship -> "o"
+    | DestroyedShip -> "x"
+
+// Horizontal Line output
+let newHorizontalLine (size: int): string = String.replicate size "-"
+
+let createFieldStringRow (index: int) (fieldStringRowArray: string []): string =
+    let character = [ 'A' .. 'Z' ].[index]
+    fieldStringRowArray
+    |> Array.map (fun str -> " " + str + " |")
+    |> String.concat ""
+    |> (+) "|"
+    |> (+) (" " + string character + " ")
 
 // Horizontal Line output
 let horizontallLine (size: int) =
     let cnt = (size + 2) * 3
     String.replicate cnt "-"
 
-// Draw the status of all Fields of a Board
-let drawFieldStatus (board: Board) =
-    let boardCharacterRange = getCharacterRange board.Size // Possible character values
-    let stringFields = List.map fieldToString board.Fields
+let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
+    let boardCharacterRange = getCharacterRange board.Size
+    let guiHorizontalLine = [ "   " + (horizontallLine board.Size) ]
 
-    printfn " "
-    printf "   "
-    for character in boardCharacterRange do
-        printf "  %c " character
-    printfn " "
+    let guiHorizontalLabels =
+        [ (boardCharacterRange
+           |> List.mapi (fun index character -> "  " + string (index + 1) + " ")
+           |> String.concat ""
+           |> (+) "   ") ]
 
-    printfn "   %s" (horizontallLine (board.Size))
-    for i = 1 to board.Size do
-        printf " %i " i
-        for j = 1 to board.Size do
-            printf "| %s " stringFields.[i + j - 2]
-        printf "|\n"
-        printfn "   %s" (horizontallLine (board.Size))
+    let fieldStringRows =
+        fieldStrings
+        |> Seq.chunkBySize board.Size
+        |> Seq.toList
+        |> List.mapi createFieldStringRow
 
-// Draw the status of all ShipPoints of a Board
-let drawShipPointStatus (board: Board) =
-    let boardCharacterRange = getCharacterRange board.Size // Possible character values
-    let boardShipPointCoords = getShipPointCoordsForBoard board // All existing ShipPoints
+    let output =
+        List.foldBack (fun element accumulator ->
+            accumulator
+            |> List.append guiHorizontalLine
+            |> List.append [ element ]) fieldStringRows []
+        |> (@) guiHorizontalLine
+        |> (@) guiHorizontalLabels
+        |> (@) [ "\n" ]
+        |> String.concat "\n"
 
-    printfn " "
-    printf "   "
-    for character in boardCharacterRange do
-        printf "  %c " character
-    printfn " "
+    printfn "%s" output
 
-    printfn "   %s" (horizontallLine (board.Size))
-    for j = 1 to board.Size do
-        printf " %i " j
-        for i = 1 to board.Size do
-            let tempCoord =
-                { X = boardCharacterRange.[i - 1]
-                  Y = j }
+let drawBoard (board: Board, fieldTransformer: Field -> string): unit =
+    let fieldStrings = board.Fields |> List.map fieldTransformer
+    drawBoardWithGui (board, fieldStrings)
 
-            let shipPointCoordExists = List.contains tempCoord boardShipPointCoords
+let drawBoardWithShipStatusVisible (board: Board): unit =
+    let fieldStrings = board.Fields |> List.map fieldToShipStatus
+    drawBoardWithGui (board, fieldStrings)
 
-            match shipPointCoordExists with
-            | true ->
-                let shipPoint = getShipPointByCoordForBoard (tempCoord, board)
-                printf "| %s " (shipPointToString shipPoint)
-            | false -> printf "|   "
+let drawHumanBoard (game: Game): unit = drawBoard (game.HumanBoard, fieldToShipStatus)
 
-        printf "|\n"
-        printfn "   %s" (horizontallLine (board.Size))
-
-// Draw the Field and ShipPoint status for the provided Board
-let drawBoardStatus (board: Board) =
-    drawShipPointStatus board
-    drawFieldStatus board
+let drawComputerBoard (game: Game): unit = drawBoard (game.ComputerBoard, fieldToAttemptStatus)
 
 // Used for ShowShips command
-let drawShips (g: Game) =
+let drawShips (game: Game) =
     printfn ""
     printfn "   You"
-    drawFieldStatus g.HumanBoard
-    drawShipPointStatus g.HumanBoard
+    drawBoardWithShipStatusVisible game.HumanBoard
     printfn ""
     printfn "   Opponent"
-    drawFieldStatus g.ComputerBoard
-    drawShipPointStatus g.ComputerBoard
+    drawBoardWithShipStatusVisible game.ComputerBoard
     printfn ""
 
 // Draw game status after every move
-let drawBoards (g: Game) =
+let drawBoards (game: Game) =
     printfn ""
     printfn "   You"
-    drawShipPointStatus g.HumanBoard
-    drawFieldStatus g.HumanBoard
+    drawHumanBoard game
     printfn ""
     printfn "   Opponent"
-    drawFieldStatus g.ComputerBoard
+    drawComputerBoard game
     printfn ""

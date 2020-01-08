@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Domain.fs" />
-    <Compile Include="Ships.fs" />
     <Compile Include="ConsoleHelper.fs" />
     <Compile Include="DomainFunctions.fs" />
     <Compile Include="Parser.fs" />

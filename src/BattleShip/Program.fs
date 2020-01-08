@@ -16,7 +16,7 @@ let main argv =
     printfn "   Please choose where you want to put your ships"
     printfn "   (e.g.: Set A1)"
     printfn ""
-    ConsoleHelper.drawFieldStatus game.HumanBoard
+    ConsoleHelper.drawHumanBoard game
     printfn ""
 
     Repl.loop game

@@ -5,7 +5,6 @@ open System
 
 let safeEquals (it: string) (theOther: string) = String.Equals(it, theOther, StringComparison.OrdinalIgnoreCase)
 
-
 [<Literal>]
 let HelpLabel = "Help"
 
