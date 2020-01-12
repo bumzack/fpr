@@ -48,6 +48,10 @@ let addShipPointAtCoordToBoard (coord: Coord, board: Board): Board =
             | _ -> field)
     { board with Fields = newFields }
 
+// Return a list of Fields with ShipStatus = Ship
+let getRemainingShipsForBoard (board: Board): List<Field> =
+    board.Fields |> List.filter (fun field -> field.ShipStatus = Ship)
+
 type Player =
     | Human
     | Computer
