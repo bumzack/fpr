@@ -49,7 +49,7 @@ let computerMove (humanBoard: Board): Coord =
     let randomNumber = randomNumberGenerator.Next(0, notAttemptedFields.Length)
     notAttemptedFields.[randomNumber].Coord
 
-let iterateFields (board: Board, coord: Coord) (field: Field): Field =
+let iterateFields (coord: Coord) (field: Field): Field =
     match field.AttemptStatus with
     | NotAttempted ->
         match field.Coord with
@@ -66,17 +66,19 @@ let iterateFields (board: Board, coord: Coord) (field: Field): Field =
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
 let hitOnBoard (board: Board, c: Coord) =
-    let newFields = board.Fields |> List.map (iterateFields (board, c))
-    { board with Fields = newFields }
+    let newFields = board.Fields |> List.map (iterateFields c)
+    let newBoard = { board with Fields = newFields }
+    let hit = (getRemainingShipsForBoard board) > (getRemainingShipsForBoard newBoard)
+    (newBoard, hit)
 
 let tryHitAt (game: Game, humanMoveCoord: Coord) =
     if isValidGameCoord (game, humanMoveCoord) then
         // if it is a hit  then return and the human can try again
-        let newComputerBoard = hitOnBoard (game.ComputerBoard, humanMoveCoord)
+        let (newComputerBoard, humanHasHit) = hitOnBoard (game.ComputerBoard, humanMoveCoord)
 
         // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
         let computerMoveCoord = computerMove game.HumanBoard
-        let newHumanBoard = hitOnBoard (game.HumanBoard, computerMoveCoord)
+        let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
 
         let newGame =
             { game with
