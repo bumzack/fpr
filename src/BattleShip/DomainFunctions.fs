@@ -8,15 +8,6 @@ let initNewField (coord: Coord): Field =
       AttemptStatus = NotAttempted
       ShipStatus = Water }
 
-// Add Ships to random Fields
-let setRandomShipForField (field: Field): Field =
-    match field.Coord with
-    | { X = 'A'; Y = 1 } -> { field with ShipStatus = Ship }
-    | { X = 'A'; Y = 2 } -> { field with ShipStatus = Ship }
-    | { X = 'C'; Y = 4 } -> { field with ShipStatus = Ship }
-    | { X = 'C'; Y = 5 } -> { field with ShipStatus = Ship }
-    | _ -> field
-
 // Create a list of all Coords for the given size
 let createCoordsForSize (size: int): List<Coord> =
     let coordCharacters = getCharacterRange size
@@ -25,19 +16,64 @@ let createCoordsForSize (size: int): List<Coord> =
             { X = character
               Y = i } ]
 
-let initRandomShipFields = initNewField >> setRandomShipForField
+// Create 4 random ship coordinates for the computer player
+let createRandomCoords (size: int): List<Coord> =
+    let coordCharacters = getCharacterRange size
+    let randomNumberGenerator = System.Random()
+    let xRand = randomNumberGenerator.Next(0, coordCharacters.Length)
+    let yRand = randomNumberGenerator.Next(0, (size - 1))
+    let xValue = coordCharacters.[xRand]
+    let yValue = yRand
+
+    let coord1 =
+        { X = xValue
+          Y = yValue }
+
+    let coord2 =
+        { X = coordCharacters.[randomNumberGenerator.Next(0, coordCharacters.Length)]
+          Y = randomNumberGenerator.Next(0, (size - 1)) }
+
+    let coord3 =
+        { X = coordCharacters.[randomNumberGenerator.Next(0, coordCharacters.Length)]
+          Y = randomNumberGenerator.Next(0, (size - 1)) }
+
+    let coord4 =
+        { X = coordCharacters.[randomNumberGenerator.Next(0, coordCharacters.Length)]
+          Y = randomNumberGenerator.Next(0, (size - 1)) }
+
+    coord1 :: coord2 :: coord3 :: [ coord4 ]
+
+let setShipForFieldAtCoord (coords: List<Coord>) (field: Field): Field =
+    match field.Coord with
+    | { X = xValue; Y = yValue } when xValue = coords.[0].X && yValue = coords.[0].Y -> { field with ShipStatus = Ship }
+    | { X = xValue; Y = yValue } when xValue = coords.[1].X && yValue = coords.[1].Y -> { field with ShipStatus = Ship }
+    | { X = xValue; Y = yValue } when xValue = coords.[2].X && yValue = coords.[2].Y -> { field with ShipStatus = Ship }
+    | { X = xValue; Y = yValue } when xValue = coords.[3].X && yValue = coords.[3].Y -> { field with ShipStatus = Ship }
+    | _ -> field
+
+let setRandomShipForBoard (board: Board): Board =
+    let emptyFields = getEmptyFieldsForBoard board
+    let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)].Coord
+    addShipPointAtCoordToBoard (coord, board)
 
 // Initialize a new Game
 let initNewGame (size: int): Game =
     let newFieldList = createCoordsForSize size |> List.map initNewField
-    let computerFieldList = createCoordsForSize size |> List.map initRandomShipFields
 
-    { HumanBoard =
-          { Fields = newFieldList
-            Size = size }
-      ComputerBoard =
-          { Fields = computerFieldList
-            Size = size }
+    let humanBoard =
+        { Fields = newFieldList
+          Size = size }
+
+    let computerBoard =
+        { Fields = newFieldList
+          Size = size }
+        |> setRandomShipForBoard
+        |> setRandomShipForBoard
+        |> setRandomShipForBoard
+        |> setRandomShipForBoard
+
+    { HumanBoard = humanBoard
+      ComputerBoard = computerBoard
       Status = SetupShips 1
       Size = size }
 

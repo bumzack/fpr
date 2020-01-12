@@ -31,6 +31,10 @@ let getCharacterRange (length: int): List<char> = [ 'A' .. 'Z' ].[0..(length - 1
 let getNotAttemptedFieldsForBoard (board: Board): List<Field> =
     board.Fields |> List.filter (fun field -> field.AttemptStatus = NotAttempted)
 
+// Return a list of Fields that have no Ship on them therefore ShipStatus = Water
+let getEmptyFieldsForBoard (board: Board): List<Field> =
+    board.Fields |> List.filter (fun field -> field.ShipStatus = Water)
+
 // Add a new ShipPoint at the provided Coord to the provided Board
 let addShipPointAtCoordToBoard (coord: Coord, board: Board): Board =
     let newFields =
@@ -39,12 +43,9 @@ let addShipPointAtCoordToBoard (coord: Coord, board: Board): Board =
             match field.Coord with
             | { X = xValue; Y = yValue } when xValue = coord.X && yValue = coord.Y ->
                 match field.ShipStatus with
-                | Water ->
-                    printfn ("New ship at %c%d") coord.X coord.Y
-                    { field with ShipStatus = Ship }
+                | Water -> { field with ShipStatus = Ship }
                 | _ -> field
             | _ -> field)
-    printfn "%A" newFields
     { board with Fields = newFields }
 
 type Player =
