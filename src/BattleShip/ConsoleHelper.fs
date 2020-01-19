@@ -10,13 +10,13 @@ let fieldToAttemptStatus (field: Field): string =
         match field.ShipStatus with
         | Water -> "~"
         | Ship -> "o"
-        | DestroyedShip -> "x"
+        | ShipHit -> "x"
 
 let fieldToShipStatus (field: Field): string =
     match field.ShipStatus with
     | Water -> " "
     | Ship -> "o"
-    | DestroyedShip -> "x"
+    | ShipHit -> "x"
 
 // Horizontal Line output
 let newHorizontalLine (size: int): string = String.replicate size "-"

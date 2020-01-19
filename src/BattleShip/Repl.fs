@@ -12,6 +12,7 @@ type ReplMessage =
 let read (input: string) =
     match input with
     | Set v -> Domain.Set v |> DomainMessage
+    | SetNew s -> Domain.SetNew s |> DomainMessage
     | Try v -> Domain.Try v |> DomainMessage
     | ShowShips -> Domain.ShowShips |> DomainMessage
     | Help -> HelpRequested
@@ -47,8 +48,11 @@ let print (game: Game, outputToPrint: string) =
     game
 
 let rec loop (game: Game) =
-    Console.ReadLine()
-    |> read
-    |> evaluate DomainFunctions.update game
-    |> print
-    |> loop
+    match game.Status with
+        | WonBy p -> printfn ("game over - player %A won! - see u next time!") p
+        | _ ->
+            Console.ReadLine()
+            |> read
+            |> evaluate DomainFunctions.update game
+            |> print
+            |> loop

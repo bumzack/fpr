@@ -4,7 +4,7 @@ module Domain
 type FieldShipStatus =
     | Water
     | Ship
-    | DestroyedShip
+    | ShipHit
 
 type FieldAttemptStatus =
     | NotAttempted
@@ -61,11 +61,25 @@ type GameStatus =
     | Running
     | SetupShips of int
 
+type Direction =
+    | North
+    | East
+    | South
+    | West
+
+type Ship = {
+    length: int
+    pos: Coord
+    direction: Direction
+}
+
+
 type Game =
     { HumanBoard: Board
       ComputerBoard: Board
       Status: GameStatus
-      Size: int }
+      Size: int
+      RequiredShips: int list }
 
 // Check if the provided coordinate is even on the board
 let isValidGameCoord (game: Game, coord: Coord): bool =
@@ -76,5 +90,6 @@ let isValidGameCoord (game: Game, coord: Coord): bool =
 // Message is a command entered by the user
 type Message =
     | Set of Coord
+    | SetNew of Ship
     | Try of Coord
     | ShowShips
