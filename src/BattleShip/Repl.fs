@@ -11,7 +11,6 @@ type ReplMessage =
 
 let read (input: string) =
     match input with
-    | Set v -> Domain.Set v |> DomainMessage
     | SetNew s -> Domain.SetNew s |> DomainMessage
     | Try v -> Domain.Try v |> DomainMessage
     | ShowShips -> Domain.ShowShips |> DomainMessage

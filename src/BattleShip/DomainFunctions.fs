@@ -226,7 +226,6 @@ let setShip (game: Game, s: Ship): Game =
 
 let update (msg: Message) (game: Game): Game =
     match msg with
-    | Set c -> set (game, c)
     | SetNew s -> setShip (game, s)
     | Try c -> tryHitAt (game, c)
     | ShowShips -> showShips (game)

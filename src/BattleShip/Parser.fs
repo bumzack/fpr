@@ -9,7 +9,7 @@ let safeEquals (it: string) (theOther: string) = String.Equals(it, theOther, Str
 let HelpLabel = "Help"
 
 
-let (|Set|SetNew|Try|ShowShips|Help|ParseFailed|) (input: string) =
+let (|SetNew|Try|ShowShips|Help|ParseFailed|) (input: string) =
     let tryParseCoord (arg: string) valueConstructor =
         if arg.Length <> 2 then
             ParseFailed
@@ -49,8 +49,6 @@ let (|Set|SetNew|Try|ShowShips|Help|ParseFailed|) (input: string) =
     | [ verb ] when safeEquals verb (nameof Domain.ShowShips) -> ShowShips
     | [ verb; arg ] when safeEquals verb (nameof Domain.Try) ->
         tryParseCoord arg (fun (x, y) -> Try(mapToCoord (x, y)))
-    | [ verb; arg1 ] when safeEquals verb (nameof Domain.Set) ->
-        tryParseCoord (arg1) (fun (x, y) -> Set(mapToCoord (x, y)))
     | [ verb; arg1; arg2; arg3 ] when safeEquals verb (nameof Domain.SetNew) ->
         tryParseShip (arg1, arg2, arg3) (fun (c, l, d) -> SetNew(mapToShip (c, l, d)))
     | _ -> ParseFailed
