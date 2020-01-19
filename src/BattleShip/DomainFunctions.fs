@@ -60,18 +60,18 @@ let randomDirection(): Direction =
     | 3 -> Direction.West
     | _ -> failwith "should never happen, our random numbers are wrong "
 
-let isCoordNotOnBoard( size  : int, c: Coord) =
+let isCoordNotOnBoard (size: int, c: Coord) =
     let idx = charToInt c.X
-    idx >= size && c.Y >=size
+    idx >= size && c.Y >= size
 
 let shipOnBoard (s: Ship, size: int) =
-    let shipCoords = createCoordList(s)
+    let shipCoords = createCoordList (s)
 
     let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard (c, s)
     let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
     coordsNotOnBoard.Length = 0
 
-let rec createRandomShip (size: int,len: int) =
+let rec createRandomShip (size: int, len: int) =
     let pos = randomCoord (size)
     let direction = randomDirection()
     let ship = mapToShip (pos, len, direction)
@@ -96,7 +96,7 @@ let initNewGame (size: int): Game =
           Size = size }
 
     // currying for the first time https://stackoverflow.com/questions/50105745/list-map-with-multiple-parameters-in-f
-    let curriedCreateRandomShip s l  = createRandomShip ( s, l)
+    let curriedCreateRandomShip s l = createRandomShip (s, l)
     let randomShips = List.map (curriedCreateRandomShip size) requiredShips
     let computerBoard = addShipsToBoard (tmpComputerBoard, randomShips)
 
@@ -196,14 +196,18 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
 
 
 
-let addShipToBoard (game: Game, s: Ship, board: Board): Board =
+let addShipToBoard (game: Game, s: Ship, board: Board)  =
     match game.Status with
-    | SetupShips value when value < game.RequiredShips.Length ->
-        let newBoard = addShipPointsToBoard (board, s)
-        newBoard
+    | SetupShips idx when idx < game.RequiredShips.Length ->
+        if s.length = game.RequiredShips.[idx] then
+            let newBoard = addShipPointsToBoard (board, s)
+            Some(newBoard)
+        else
+            printfn "Your ship has length %i but should have length %i - try again!" s.length  game.RequiredShips.[idx]
+            None
     | _ ->
         ConsoleHelper.drawBoards game
-        board
+        None
 
 
 // Cheat code - Show all ships
@@ -214,19 +218,28 @@ let showShips (game: Game) =
 
 
 let setShip (game: Game, s: Ship): Game =
-    // TODO: validate length of ship
     // TODO: check if ship does not collide with other ships
-    match game.Status with
-    | SetupShips shipIdx when shipIdx < game.RequiredShips.Length ->
-        let humandboard = addShipToBoard (game, s, game.HumanBoard)
-        let newGame = { game with HumanBoard = humandboard }
-        let newShipIdx = shipIdx + 1
-        if newShipIdx >= newGame.RequiredShips.Length then { newGame with Status = Running }
-        else { newGame with Status = SetupShips newShipIdx }
-    | _ ->
-        printfn ("enough ships - lets play!")
-        printfn ("use command 'Try' and coordinates like A2  and destroy the computers ships")
+    match shipOnBoard (s, game.Size) with
+    | true ->
+        match game.Status with
+        | SetupShips shipIdx when shipIdx < game.RequiredShips.Length ->
+            let humandboard = addShipToBoard (game, s, game.HumanBoard)
+            if humandboard.IsSome  then
+                let newGame = { game with HumanBoard = humandboard.Value }
+                let newShipIdx = shipIdx + 1
+                if newShipIdx >= newGame.RequiredShips.Length then { newGame with Status = Running }
+                else { newGame with Status = SetupShips newShipIdx }
+            else
+                game
+        | _ ->
+            printfn ("enough ships - lets play!")
+            printfn ("use command 'Try' and coordinates like A2  and destroy the computers ships")
+            game
+
+    | false ->
+        printfn ("ship does not fit on the board - try again!")
         game
+
 
 let update (msg: Message) (game: Game): Game =
     match msg with
