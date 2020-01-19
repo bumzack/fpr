@@ -11,7 +11,7 @@ type ReplMessage =
 
 let read (input: string) =
     match input with
-    | SetNew s -> Domain.SetNew s |> DomainMessage
+    | Set s -> Domain.Set s |> DomainMessage
     | Try v -> Domain.Try v |> DomainMessage
     | ShowShips -> Domain.ShowShips |> DomainMessage
     | Help -> HelpRequested
@@ -47,11 +47,21 @@ let print (game: Game, outputToPrint: string) =
     game
 
 let rec loop (game: Game) =
-    match game.Status with
-        | WonBy p -> printfn ("game over - player %A won! - see u next time!") p
-        | _ ->
-            Console.ReadLine()
+    let runLoop(g: Game) =
+        Console.ReadLine()
             |> read
-            |> evaluate DomainFunctions.update game
+            |> evaluate DomainFunctions.update g
             |> print
             |> loop
+
+    match game.Status with
+        | WonBy p ->
+            printfn ("game over - player %A won! - see u next time!") p
+            game
+        | SetupShips idx ->
+            printfn ("setup a ship of length %i on the field ") game.RequiredShips.[idx]
+            runLoop game
+        | Running ->
+            let remaining = getRemainingShipsForBoard(game.ComputerBoard).Length
+            printfn ("your turn. %i fields with a ship are remaining ") remaining
+            runLoop game

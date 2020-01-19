@@ -78,6 +78,26 @@ let hitOnBoard (board: Board, c: Coord) =
     let hit = (getRemainingShipsForBoard board).Length > (getRemainingShipsForBoard newBoard).Length
     (newBoard, hit)
 
+let rec runComputerLoop (game: Game) =
+
+    let computerMoveCoord = computerMove game.HumanBoard
+    let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
+
+    // System.Console.Clear()
+
+    match computerHasHit with
+    | false -> printfn "The computer tried at %c%i and missed" computerMoveCoord.X computerMoveCoord.Y
+    | true -> printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
+
+    printfn ""
+    ConsoleHelper.drawBoards game
+
+    match computerHasHit with
+    | false -> game
+    | true ->
+        let newGame = { game with HumanBoard = newHumanBoard }
+        runComputerLoop (newGame)
+
 let tryHitAt (game: Game, humanMoveCoord: Coord) =
     let newGame =
         match isValidGameCoord (game, humanMoveCoord) with
@@ -88,7 +108,7 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
             // if it is a hit  then return and the human can try again
             | true ->
                 let newGame = { game with ComputerBoard = newComputerBoard }
-                System.Console.Clear()
+                // System.Console.Clear()
                 ConsoleHelper.drawBoards newGame
                 printfn ""
                 printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
@@ -98,20 +118,12 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
 
             // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
             | false ->
-                let computerMoveCoord = computerMove game.HumanBoard
-                let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
-
-                let newGame =
-                    { game with
-                          ComputerBoard = newComputerBoard
-                          HumanBoard = newHumanBoard }
-
-                System.Console.Clear()
-                ConsoleHelper.drawBoards newGame
                 printfn ""
                 printfn "You missed at %c%i" humanMoveCoord.X humanMoveCoord.Y
-                printfn "The computer tried at %c%i" computerMoveCoord.X computerMoveCoord.Y
                 printfn ""
+                printfn "now it's the computers turn"
+                let newGame = { game with ComputerBoard = newComputerBoard }
+                let newGame = runComputerLoop (newGame)
                 newGame
         | false ->
             printfn "The given coordinate is not valid!"
@@ -119,43 +131,6 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
     if (allShipsDestroyed (newGame.HumanBoard)) then { newGame with Status = WonBy Computer }
     elif (allShipsDestroyed (newGame.ComputerBoard)) then { newGame with Status = WonBy Human }
     else newGame
-
-
-let addShip (game: Game, coord: Coord): Game =
-    match game.Status with
-    | SetupShips value when value <= 3 ->
-        let newGame =
-            { game with
-                  HumanBoard = addShipPointAtCoordToBoard (coord, game.HumanBoard)
-                  Status = SetupShips(value + 1) }
-
-        System.Console.Clear()
-        printfn ""
-        printfn "   You"
-        ConsoleHelper.drawHumanBoard newGame
-        newGame
-    | SetupShips 3 ->
-        let newGame =
-            { game with
-                  HumanBoard = addShipPointAtCoordToBoard (coord, game.HumanBoard)
-                  Status = SetupShips 4 }
-
-        System.Console.Clear()
-        ConsoleHelper.drawBoards newGame
-        newGame
-    | SetupShips 4 ->
-        let newGame =
-            { game with
-                  HumanBoard = addShipPointAtCoordToBoard (coord, game.HumanBoard)
-                  Status = Running }
-
-        System.Console.Clear()
-        ConsoleHelper.drawBoards newGame
-        newGame
-    | _ ->
-        ConsoleHelper.drawBoards game
-        game
-
 
 
 let rec helper (board: Board, coords: Coord list) =
@@ -183,28 +158,9 @@ let addShipToBoard (game: Game, s: Ship, board: Board): Board =
 
 // Cheat code - Show all ships
 let showShips (game: Game) =
-    System.Console.Clear()
+    // System.Console.Clear()
     ConsoleHelper.drawShips (game)
     game
-
-
-// Human player sets new ShipPoints on the provided Coord
-let set (game: Game, c: Coord): Game =
-    // TODO: validate length of ship
-    // TODO: check if ship does not collide with other ships
-    match game.Status with
-    | SetupShips idx when idx < game.RequiredShips.Length ->
-        match isValidGameCoord (game, c) with
-        | true -> addShip (game, c)
-        | false ->
-            printfn ("Invalid coordinate %c%d") c.X c.Y
-            printfn ("Try again!")
-            game
-    | _ ->
-        printfn ("enough ships - lets play!")
-        printfn ("use command 'Hit coord'! and destroy the computers ships")
-        game
-
 
 
 let setShip (game: Game, s: Ship): Game =
@@ -219,13 +175,11 @@ let setShip (game: Game, s: Ship): Game =
         else { newGame with Status = SetupShips newShipIdx }
     | _ ->
         printfn ("enough ships - lets play!")
-        printfn ("use command 'Hit COORD'! and destroy the computers ships")
+        printfn ("use command 'Try' and coordinates like A2  and destroy the computers ships")
         game
-
-
 
 let update (msg: Message) (game: Game): Game =
     match msg with
-    | SetNew s -> setShip (game, s)
+    | Set s -> setShip (game, s)
     | Try c -> tryHitAt (game, c)
     | ShowShips -> showShips (game)

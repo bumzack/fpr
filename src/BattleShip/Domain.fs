@@ -89,6 +89,6 @@ let isValidGameCoord (game: Game, coord: Coord): bool =
 
 // Message is a command entered by the user
 type Message =
-    | SetNew of Ship
+    | Set of Ship
     | Try of Coord
     | ShowShips
