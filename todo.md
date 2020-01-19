@@ -2,7 +2,7 @@
 
 in dieser prio
 
-- [ ] remove SetNew and rename to Set
+- [x] remove SetNew and rename to Set
 - [x] Spiel beenden
 - [ ] doppelte eingaben
 - [ ] Ausgabe, wo hat der COmputer probiert: das eigene Brett anpassen

@@ -25,6 +25,8 @@ let setRandomShipForBoard (board: Board): Board =
 
 // Initialize a new Game
 let initNewGame (size: int): Game =
+    let requiredShips = [2; 2]
+
     let newFieldList = createCoordsForSize size |> List.map initNewField
 
     let humanBoard =
@@ -43,7 +45,7 @@ let initNewGame (size: int): Game =
       ComputerBoard = computerBoard
       Status = SetupShips 0
       Size = size
-      RequiredShips = [ 2; 2 ] }
+      RequiredShips = requiredShips }
 
 // Computer makes a random move
 let computerMove (humanBoard: Board): Coord =
