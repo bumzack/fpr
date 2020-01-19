@@ -1,8 +1,21 @@
 module DomainFunctions
 
-open System
 open Domain
 open Utils
+
+let rec helper (board: Board, coords: Coord list) =
+    match coords with
+    | head :: tail ->
+        let newboard = addShipPointAtCoordToBoard (head, board)
+        helper (newboard, tail)
+    | [] -> board
+
+
+let addShipPointsToBoard (board: Board, s: Ship) =
+    let shipCoordinates = createCoordList (s)
+    let newBoard = helper (board, shipCoordinates)
+    newBoard
+
 
 // Initialize a new Field at the given Coord
 let initNewField (coord: Coord): Field =
@@ -18,14 +31,59 @@ let createCoordsForSize (size: int): List<Coord> =
             { X = character
               Y = i } ]
 
+
+
+let rec addShipsToBoard (board: Board, ships: Ship list) =
+    match ships with
+    | head :: tail ->
+        let newBoard = addShipPointsToBoard (board, head)
+        addShipsToBoard (newBoard, tail)
+    | [] -> board
+
+
 let setRandomShipForBoard (board: Board): Board =
     let emptyFields = getEmptyFieldsForBoard board
     let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)].Coord
     addShipPointAtCoordToBoard (coord, board)
 
+let randomCoord (size: int): Coord =
+    let emptyFields = createCoordsForSize (size)
+    let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)]
+    coord
+
+let randomDirection(): Direction =
+    let d = System.Random().Next(0, 4)
+    match d with
+    | 0 -> Direction.North
+    | 1 -> Direction.East
+    | 2 -> Direction.South
+    | 3 -> Direction.West
+    | _ -> failwith "should never happen, our random numbers are wrong "
+
+let isCoordNotOnBoard( size  : int, c: Coord) =
+    let idx = charToInt c.X
+    idx >= size && c.Y >=size
+
+let shipOnBoard (s: Ship, size: int) =
+    let shipCoords = createCoordList(s)
+
+    let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard (c, s)
+    let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
+    coordsNotOnBoard.Length = 0
+
+let rec createRandomShip (size: int,len: int) =
+    let pos = randomCoord (size)
+    let direction = randomDirection()
+    let ship = mapToShip (pos, len, direction)
+
+    match shipOnBoard (ship, size) with
+    | true -> ship
+    | false -> createRandomShip (len, size)
+
+
 // Initialize a new Game
 let initNewGame (size: int): Game =
-    let requiredShips = [2; 2]
+    let requiredShips = [ 2; 2 ]
 
     let newFieldList = createCoordsForSize size |> List.map initNewField
 
@@ -33,13 +91,15 @@ let initNewGame (size: int): Game =
         { Fields = newFieldList
           Size = size }
 
-    let computerBoard =
+    let tmpComputerBoard =
         { Fields = newFieldList
           Size = size }
-        |> setRandomShipForBoard
-        |> setRandomShipForBoard
-        |> setRandomShipForBoard
-        |> setRandomShipForBoard
+
+    // currying for the first time https://stackoverflow.com/questions/50105745/list-map-with-multiple-parameters-in-f
+    let curriedCreateRandomShip s l  = createRandomShip ( s, l)
+    let randomShips = List.map (curriedCreateRandomShip size) requiredShips
+    let computerBoard = addShipsToBoard (tmpComputerBoard, randomShips)
+
 
     { HumanBoard = humanBoard
       ComputerBoard = computerBoard
@@ -135,18 +195,6 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
     else newGame
 
 
-let rec helper (board: Board, coords: Coord list) =
-    match coords with
-    | head :: tail ->
-        let newboard = addShipPointAtCoordToBoard (head, board)
-        helper (newboard, tail)
-    | [] -> board
-
-
-let addShipPointsToBoard (board: Board, s: Ship) =
-    let shipCoordinates = createCoordList (s)
-    let newBoard = helper (board, shipCoordinates)
-    newBoard
 
 let addShipToBoard (game: Game, s: Ship, board: Board): Board =
     match game.Status with
