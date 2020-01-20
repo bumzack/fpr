@@ -1,6 +1,7 @@
 # Todo
 
 ## wäre gut
+- [ ] beim HumanPlayer die Schiffe anzeigen in ```drawBoards (game: Game) ```
 - [ ] es gibt kein "Schiff 1 versenkt", dann "Schiff 2 versenkt" -- Spiel ist einfach aus, wenn  alle Felder mit Schiffen getroffen wurden
 
 ## wäre nett

@@ -66,9 +66,6 @@ let createBoardStringList (board: Board, fieldStrings: List<string>) =
 let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
     printfn "%s" ( createBoardStringList(board, fieldStrings))
 
-let drawBoard (board: Board, fieldTransformer: Field -> string): unit =
-    let fieldStrings = board.Fields |> List.map fieldTransformer
-    drawBoardWithGui (board, fieldStrings)
 
 let drawBoardStringList (board: Board, fieldTransformer: Field -> string) =
     let fieldStrings = board.Fields |> List.map fieldTransformer
@@ -78,16 +75,18 @@ let drawBoardWithShipStatusVisible (board: Board): unit =
     let fieldStrings = board.Fields |> List.map fieldToShipStatus
     drawBoardWithGui (board, fieldStrings)
 
-let drawHumanBoard (game: Game): unit = drawBoard (game.HumanBoard, fieldToAttemptStatus)
 
 let drawHumanBoardStringList (game: Game) =
     drawBoardStringList (game.HumanBoard, fieldToAttemptStatus)
 
-
-let drawComputerBoard (game: Game): unit = drawBoard (game.ComputerBoard, fieldToAttemptStatus)
+let drawHumanBoard (game: Game): unit =
+    printfn "%s" (drawHumanBoardStringList(game))
 
 let drawComputerBoardStringList (game: Game) =
     drawBoardStringList (game.ComputerBoard, fieldToAttemptStatus)
+
+let drawComputerBoard (game: Game) =
+    printfn "%s" (drawComputerBoardStringList(game))
 
 // Used for ShowShips command
 let drawShips (game: Game) =
@@ -101,7 +100,7 @@ let drawShips (game: Game) =
 // Draw game status after every move
 let drawBoards (game: Game) =
     let b1 = drawHumanBoardStringList game
-    let b1 =  "\n" + "     You              T  " + "\n" + b1
+    let b1 =  "\n" + "   You                   " + "\n" + b1
     let b2 = drawComputerBoardStringList game
     let b2 =  "\n" + " Opponent  " + "\n" + b2
 
