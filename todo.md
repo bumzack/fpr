@@ -2,7 +2,7 @@
 
 ## wäre gut
 - [ ] Ausgabe, wo hat der Computer probiert: das eigene Brett anpassen
-- [ ] der Code in ```setShip``` macht nicht das was er soll ```match shipOnBoard (s, game.Size) with``` und man kann große Schiffe setzen
+- [ ] es gibt kein "Schiff 1 versenkt" - sondern nur, wenn alle FElder mit Schiffen getroffen -> Spiel aus
 
 ## wäre nett
 - [ ] doppelte eingaben abfange
@@ -17,6 +17,7 @@
 - [x] Spiel beenden
 - [x] Schiffformen  Computer Random generiert anpassen (2er Schiffe, 3 Stk)
 - [x] Schiffformen (2er Schiffe, 3 Stk)
+- [x] der Code in ```setShip``` macht nicht das was er soll ```match shipOnBoard (s, game.Size) with``` und man kann große Schiffe setzen
 
 ## Bug:
 
