@@ -51,25 +51,22 @@ let randomCoord (size: int): Coord =
     let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)]
     coord
 
-let randomDirection(): Direction =
-    let d = System.Random().Next(0, 4)
-    match d with
-    | 0 -> Direction.North
-    | 1 -> Direction.East
-    | 2 -> Direction.South
-    | 3 -> Direction.West
-    | _ -> failwith "should never happen, our random numbers are wrong "
+
 
 let isCoordNotOnBoard (size: int, c: Coord) =
     let idx = charToInt c.X
-    idx >= size && c.Y >= size
+    let res = idx > size || c.Y > size
+    res
 
 let shipOnBoard (s: Ship, size: int) =
     let shipCoords = createCoordList (s)
 
-    let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard (c, s)
-    let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
-    coordsNotOnBoard.Length = 0
+    match shipCoords.Length with
+    | 0 -> false
+    | _ ->
+        let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard(c, s)
+        let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
+        coordsNotOnBoard.Length = 0
 
 let rec createRandomShip (size: int, len: int) =
     let pos = randomCoord (size)
@@ -196,14 +193,14 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
 
 
 
-let addShipToBoard (game: Game, s: Ship, board: Board)  =
+let addShipToBoard (game: Game, s: Ship, board: Board) =
     match game.Status with
     | SetupShips idx when idx < game.RequiredShips.Length ->
         if s.length = game.RequiredShips.[idx] then
             let newBoard = addShipPointsToBoard (board, s)
             Some(newBoard)
         else
-            printfn "Your ship has length %i but should have length %i - try again!" s.length  game.RequiredShips.[idx]
+            printfn "Your ship has length %i but should have length %i - try again!" s.length game.RequiredShips.[idx]
             None
     | _ ->
         ConsoleHelper.drawBoards game
@@ -218,13 +215,14 @@ let showShips (game: Game) =
 
 
 let setShip (game: Game, s: Ship): Game =
+
     // TODO: check if ship does not collide with other ships
     match shipOnBoard (s, game.Size) with
     | true ->
         match game.Status with
         | SetupShips shipIdx when shipIdx < game.RequiredShips.Length ->
             let humandboard = addShipToBoard (game, s, game.HumanBoard)
-            if humandboard.IsSome  then
+            if humandboard.IsSome then
                 let newGame = { game with HumanBoard = humandboard.Value }
                 let newShipIdx = shipIdx + 1
                 if newShipIdx >= newGame.RequiredShips.Length then { newGame with Status = Running }
@@ -239,7 +237,6 @@ let setShip (game: Game, s: Ship): Game =
     | false ->
         printfn ("ship does not fit on the board - try again!")
         game
-
 
 let update (msg: Message) (game: Game): Game =
     match msg with

@@ -19,5 +19,5 @@ let main argv =
     ConsoleHelper.drawHumanBoard game
     printfn ""
 
-    Repl.loop game
+    let res = Repl.loop game
     0 // return an integer exit code
