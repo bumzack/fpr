@@ -70,7 +70,7 @@ let drawBoardWithShipStatusVisible (board: Board): unit =
     let fieldStrings = board.Fields |> List.map fieldToShipStatus
     drawBoardWithGui (board, fieldStrings)
 
-let drawHumanBoard (game: Game): unit = drawBoard (game.HumanBoard, fieldToShipStatus)
+let drawHumanBoard (game: Game): unit = drawBoard (game.HumanBoard, fieldToAttemptStatus)
 
 let drawComputerBoard (game: Game): unit = drawBoard (game.ComputerBoard, fieldToAttemptStatus)
 
@@ -82,7 +82,6 @@ let drawShips (game: Game) =
     printfn ""
     printfn "   Opponent"
     drawBoardWithShipStatusVisible game.ComputerBoard
-    printfn ""
 
 // Draw game status after every move
 let drawBoards (game: Game) =
@@ -92,4 +91,3 @@ let drawBoards (game: Game) =
     printfn ""
     printfn "   Opponent"
     drawComputerBoard game
-    printfn ""

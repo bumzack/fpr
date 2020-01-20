@@ -46,31 +46,30 @@ let createCoordList (s: Ship) =
     let fields =
         match s.direction with
         | North ->
-            let tmp = tmp |> List.map (fun y -> (s.pos.Y - y))
-            let min = tmp |> List.min
+            let tmp1 = tmp |> List.map (fun y -> (s.pos.Y - y))
+            let min = tmp1 |> List.min
             if min <= 0 then
                 []
             else
-                let fields = tmp |> List.map (fun y -> mapToCoord (s.pos.X, y))
+                let fields = tmp1 |> List.map (fun y -> mapToCoord (s.pos.X, y))
                 fields
         | South ->
-            let tmp = tmp |> List.map (fun y -> (s.pos.Y + y))
-            let fields = tmp |> List.map (fun y -> mapToCoord (s.pos.X, y))
+            let tmp1 = tmp |> List.map (fun y -> (s.pos.Y + y))
+            let fields = tmp1 |> List.map (fun y -> mapToCoord (s.pos.X, y))
             fields
         | East ->
             let idx = charToInt s.pos.X
-            let tmp = tmp |> List.map (fun x -> (idx + x))
-            let fields = tmp |> List.map (fun y -> mapToCoord (intToChar y, s.pos.Y))
+            let tmp1 = tmp |> List.map (fun x -> (idx + x  ))
+            let fields = tmp1 |> List.map (fun y -> mapToCoord (intToChar y, s.pos.Y))
             fields
         | West ->
             let idx = charToInt s.pos.X
-            let tmp = tmp |> List.map (fun x -> (idx - x))
-
-            let min = tmp |> List.min
-            if min <= 0 then
+            let tmp1 = tmp |> List.map (fun x -> (idx - x))
+            let min = tmp1 |> List.min
+            if min < 0 then
                 []
             else
-                let fields = tmp |> List.map (fun y -> mapToCoord (intToChar y, s.pos.Y))
+                let fields = tmp1 |> List.map (fun y -> mapToCoord (intToChar y, s.pos.Y))
                 fields
 
     fields

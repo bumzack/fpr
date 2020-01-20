@@ -64,4 +64,5 @@ let rec loop (game: Game) =
         | Running ->
             let remaining = getRemainingShipsForBoard(game.ComputerBoard).Length
             printfn ("your turn. %i fields with a ship are remaining ") remaining
+            printfn ""
             runLoop game

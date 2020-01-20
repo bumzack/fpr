@@ -55,7 +55,7 @@ let randomCoord (size: int): Coord =
 
 let isCoordNotOnBoard (size: int, c: Coord) =
     let idx = charToInt c.X
-    let res = idx > size || c.Y > size
+    let res = idx >= size || c.Y > size
     res
 
 let shipOnBoard (s: Ship, size: int) =
@@ -145,8 +145,12 @@ let rec runComputerLoop (game: Game) =
     // System.Console.Clear()
 
     match computerHasHit with
-    | false -> printfn "The computer tried at %c%i and missed" computerMoveCoord.X computerMoveCoord.Y
-    | true -> printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
+    | false ->
+        printfn ""
+        printfn "The computer tried at %c%i and missed" computerMoveCoord.X computerMoveCoord.Y
+    | true ->
+        printfn ""
+        printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
 
     printfn ""
     ConsoleHelper.drawBoards game
