@@ -22,7 +22,7 @@ let fieldToShipStatus (field: Field): string =
 let newHorizontalLine (size: int): string = String.replicate size "-"
 
 let createFieldStringRow (index: int) (fieldStringRowArray: string []): string =
-    let character = [ 'A' .. 'Z' ].[index]
+    let character = [ '1' .. '9' ].[index]
     fieldStringRowArray
     |> Array.map (fun str -> " " + str + " |")
     |> String.concat ""
@@ -40,7 +40,7 @@ let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
 
     let guiHorizontalLabels =
         [ (boardCharacterRange
-           |> List.mapi (fun index character -> "  " + string (index + 1) + " ")
+           |> List.map (fun  c -> "  " + string c + " ")
            |> String.concat ""
            |> (+) "   ") ]
 

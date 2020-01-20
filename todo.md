@@ -1,7 +1,7 @@
 # Todo
 
 ## wäre gut
-- [ ] es gibt kein "Schiff 1 versenkt" - sondern nur, wenn alle FElder mit Schiffen getroffen -> Spiel aus
+- [ ] es gibt kein "Schiff 1 versenkt", dann "Schiff 2 versenkt" -- Spiel ist einfach aus, wenn  alle Felder mit Schiffen getroffen wurden
 
 ## wäre nett
 - [ ] doppelte eingaben abfange
