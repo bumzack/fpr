@@ -138,7 +138,6 @@ let hitOnBoard (board: Board, c: Coord) =
     (newBoard, hit)
 
 let rec runComputerLoop (game: Game) =
-
     let computerMoveCoord = computerMove game.HumanBoard
     let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
 
@@ -153,12 +152,13 @@ let rec runComputerLoop (game: Game) =
         printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
 
     printfn ""
-    ConsoleHelper.drawBoards game
+    let newGame = { game with HumanBoard = newHumanBoard }
+    ConsoleHelper.drawBoards newGame
 
     match computerHasHit with
-    | false -> game
+    | false ->
+        newGame
     | true ->
-        let newGame = { game with HumanBoard = newHumanBoard }
         runComputerLoop (newGame)
 
 let tryHitAt (game: Game, humanMoveCoord: Coord) =
@@ -191,6 +191,7 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
         | false ->
             printfn "The given coordinate is not valid!"
             game
+
     if (allShipsDestroyed (newGame.HumanBoard)) then { newGame with Status = WonBy Computer }
     elif (allShipsDestroyed (newGame.ComputerBoard)) then { newGame with Status = WonBy Human }
     else newGame
