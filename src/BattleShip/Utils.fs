@@ -73,3 +73,26 @@ let createCoordList (s: Ship) =
                 fields
 
     fields
+
+
+let rec mergeStringsHelper (l1 : string list, l2 : string list, gap : int ) =
+    let a = l1.Head
+    let b = l2.Head
+    let fill = String.replicate gap " "
+
+    let s = a + fill + b
+
+    if (not l1.Tail.IsEmpty) then
+        s :: mergeStringsHelper(l1.Tail, l2.Tail, gap)
+    else
+       [s]
+
+
+let mergeStrings (b1 : string, b2 : string) =
+    let left = b1.Split '\n' |> Seq.toList
+    let right = b2.Split '\n' |> Seq.toList
+
+    if (left.Length <> right.Length) then
+        failwith "length must equal!"
+    else
+        mergeStringsHelper (left, right, 5)

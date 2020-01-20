@@ -26,8 +26,8 @@ let initNewField (coord: Coord): Field =
 // Create a list of all Coords for the given size
 let createCoordsForSize (size: int): List<Coord> =
     let coordCharacters = getCharacterRange size
-    [ for character in coordCharacters do
-        for i in 1 .. size ->
+    [ for i in 1 .. size do
+        for character in coordCharacters ->
             { X = character
               Y = i } ]
 
@@ -64,7 +64,7 @@ let shipOnBoard (s: Ship, size: int) =
     match shipCoords.Length with
     | 0 -> false
     | _ ->
-        let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard(c, s)
+        let curriedIsCoordNotOnBoard c s = isCoordNotOnBoard (c, s)
         let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
         coordsNotOnBoard.Length = 0
 
@@ -177,6 +177,7 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
                 printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
                 printfn "You have another go!"
                 printfn ""
+
                 newGame
 
             // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs

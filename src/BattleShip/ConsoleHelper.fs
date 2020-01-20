@@ -34,7 +34,8 @@ let horizontallLine (size: int) =
     let cnt = (size + 2) * 3
     String.replicate cnt "-"
 
-let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
+
+let createBoardStringList (board: Board, fieldStrings: List<string>) =
     let boardCharacterRange = getCharacterRange board.Size
     let guiHorizontalLine = [ "   " + (horizontallLine board.Size) ]
 
@@ -60,11 +61,18 @@ let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
         |> (@) [ "\n" ]
         |> String.concat "\n"
 
-    printfn "%s" output
+    output
+
+let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
+    printfn "%s" ( createBoardStringList(board, fieldStrings))
 
 let drawBoard (board: Board, fieldTransformer: Field -> string): unit =
     let fieldStrings = board.Fields |> List.map fieldTransformer
     drawBoardWithGui (board, fieldStrings)
+
+let drawBoardStringList (board: Board, fieldTransformer: Field -> string) =
+    let fieldStrings = board.Fields |> List.map fieldTransformer
+    createBoardStringList (board, fieldStrings)
 
 let drawBoardWithShipStatusVisible (board: Board): unit =
     let fieldStrings = board.Fields |> List.map fieldToShipStatus
@@ -72,7 +80,14 @@ let drawBoardWithShipStatusVisible (board: Board): unit =
 
 let drawHumanBoard (game: Game): unit = drawBoard (game.HumanBoard, fieldToAttemptStatus)
 
+let drawHumanBoardStringList (game: Game) =
+    drawBoardStringList (game.HumanBoard, fieldToAttemptStatus)
+
+
 let drawComputerBoard (game: Game): unit = drawBoard (game.ComputerBoard, fieldToAttemptStatus)
+
+let drawComputerBoardStringList (game: Game) =
+    drawBoardStringList (game.ComputerBoard, fieldToAttemptStatus)
 
 // Used for ShowShips command
 let drawShips (game: Game) =
@@ -85,9 +100,10 @@ let drawShips (game: Game) =
 
 // Draw game status after every move
 let drawBoards (game: Game) =
-    printfn ""
-    printfn "   You"
-    drawHumanBoard game
-    printfn ""
-    printfn "   Opponent"
-    drawComputerBoard game
+    let b1 = drawHumanBoardStringList game
+    let b1 =  "\n" + "     You              T  " + "\n" + b1
+    let b2 = drawComputerBoardStringList game
+    let b2 =  "\n" + " Opponent  " + "\n" + b2
+
+    let output = Utils.mergeStrings (b1, b2) |> String.concat "\n"
+    printfn "%s" output
