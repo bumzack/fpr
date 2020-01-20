@@ -18,6 +18,18 @@ let fieldToShipStatus (field: Field): string =
     | Ship -> "o"
     | ShipHit -> "x"
 
+let fieldToCombinedStatus (field: Field): string =
+    match field.AttemptStatus with
+    | NotAttempted ->
+        match field.ShipStatus with
+        | Ship -> "o"
+        | _ -> " "
+    | Attempted ->
+        match field.ShipStatus with
+        | Water -> "~"
+        | Ship -> "o"
+        | ShipHit -> "x"
+
 // Horizontal Line output
 let newHorizontalLine (size: int): string = String.replicate size "-"
 
@@ -77,7 +89,7 @@ let drawBoardWithShipStatusVisible (board: Board): unit =
 
 
 let drawHumanBoardStringList (game: Game) =
-    drawBoardStringList (game.HumanBoard, fieldToAttemptStatus)
+    drawBoardStringList (game.HumanBoard, fieldToCombinedStatus)
 
 let drawHumanBoard (game: Game): unit =
     printfn "%s" (drawHumanBoardStringList(game))
