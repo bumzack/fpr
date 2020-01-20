@@ -1,7 +1,6 @@
 # Todo
 
 ## wäre gut
-- [ ] beim HumanPlayer die Schiffe anzeigen in ```drawBoards (game: Game) ```
 - [ ] es gibt kein "Schiff 1 versenkt", dann "Schiff 2 versenkt" -- Spiel ist einfach aus, wenn  alle Felder mit Schiffen getroffen wurden
 
 ## wäre nett
@@ -9,6 +8,7 @@
 - [ ] Schiffe auf benachbarten Feldern verhindern
 
 ## erledigt
+- [x] beim HumanPlayer die Schiffe anzeigen in ```drawBoards (game: Game) ```
 - [x] Ausgabe, wo hat der Computer probiert: das eigene Brett anpassen
 - [x] Bug: am Spielfeld rand wird ein Schiff nicht gesetzt?\
     wenn ein invalides schiff gesetzt wird, dann wird der Game Status auf den nächsten Index gesetzt, dass sollte nicht
