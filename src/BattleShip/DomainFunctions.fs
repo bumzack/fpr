@@ -102,7 +102,7 @@ let computerMove (humanBoard: Board): Coord =
     let randomNumber = randomNumberGenerator.Next(0, notAttemptedFields.Length)
     notAttemptedFields.[randomNumber].Coord
 
-let iterateFields (coord: Coord) (field: Field): Field =
+let hitField (coord: Coord) (field: Field): Field =
     match field.AttemptStatus with
     | NotAttempted ->
         match field.Coord with
@@ -123,7 +123,7 @@ let allShipsDestroyed (board: Board) =
 
 // can be used for both boards - so for human entered coordinates or random created coords for the computer attempts
 let hitOnBoard (board: Board, c: Coord) =
-    let newFields = board.Fields |> List.map (iterateFields c)
+    let newFields = board.Fields |> List.map (hitField c)
     let newBoard = { board with Fields = newFields }
     let hit = (getRemainingShipsForBoard board).Length > (getRemainingShipsForBoard newBoard).Length
     (newBoard, hit)
@@ -208,7 +208,6 @@ let showShips (game: Game) =
     game
 
 let setShip (game: Game, s: Ship): Game =
-
     match shipOnBoard (s, game.Size) with
     | true ->
         match game.Status with
