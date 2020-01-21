@@ -10,12 +10,10 @@ let rec helper (board: Board, coords: Coord list) =
         helper (newboard, tail)
     | [] -> board
 
-
 let addShipPointsToBoard (board: Board, s: Ship) =
     let shipCoordinates = createCoordList (s)
     let newBoard = helper (board, shipCoordinates)
     newBoard
-
 
 // Initialize a new Field at the given Coord
 let initNewField (coord: Coord): Field =
@@ -31,15 +29,12 @@ let createCoordsForSize (size: int): List<Coord> =
             { X = character
               Y = i } ]
 
-
-
 let rec addShipsToBoard (board: Board, ships: Ship list) =
     match ships with
     | head :: tail ->
         let newBoard = addShipPointsToBoard (board, head)
         addShipsToBoard (newBoard, tail)
     | [] -> board
-
 
 let setRandomShipForBoard (board: Board): Board =
     let emptyFields = getEmptyFieldsForBoard board
@@ -50,8 +45,6 @@ let randomCoord (size: int): Coord =
     let emptyFields = createCoordsForSize (size)
     let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)]
     coord
-
-
 
 let isCoordNotOnBoard (size: int, c: Coord) =
     let idx = charToInt c.X
@@ -77,7 +70,6 @@ let rec createRandomShip (size: int, len: int) =
     | true -> ship
     | false -> createRandomShip (len, size)
 
-
 // Initialize a new Game
 let initNewGame (size: int): Game =
     let requiredShips = [ 2; 2 ]
@@ -96,7 +88,6 @@ let initNewGame (size: int): Game =
     let curriedCreateRandomShip s l = createRandomShip (s, l)
     let randomShips = List.map (curriedCreateRandomShip size) requiredShips
     let computerBoard = addShipsToBoard (tmpComputerBoard, randomShips)
-
 
     { HumanBoard = humanBoard
       ComputerBoard = computerBoard
@@ -141,8 +132,6 @@ let rec runComputerLoop (game: Game) =
     let computerMoveCoord = computerMove game.HumanBoard
     let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
 
-    // System.Console.Clear()
-
     match computerHasHit with
     | false ->
         printfn ""
@@ -168,10 +157,8 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
             let (newComputerBoard, humanHasHit) = hitOnBoard (game.ComputerBoard, humanMoveCoord)
 
             match humanHasHit with
-            // if it is a hit  then return and the human can try again
             | true ->
                 let newGame = { game with ComputerBoard = newComputerBoard }
-                // System.Console.Clear()
                 ConsoleHelper.drawBoards newGame
                 printfn ""
                 printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
@@ -180,7 +167,6 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
 
                 newGame
 
-            // if it is a miss; then it is the computers turn, then let the computer randomly choose an action until a miss occurs
             | false ->
                 printfn ""
                 printfn "You missed at %c%i" humanMoveCoord.X humanMoveCoord.Y
@@ -197,8 +183,6 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
     elif (allShipsDestroyed (newGame.ComputerBoard)) then { newGame with Status = WonBy Human }
     else newGame
 
-
-
 let addShipToBoard (game: Game, s: Ship, board: Board) =
     match game.Status with
     | SetupShips idx when idx < game.RequiredShips.Length ->
@@ -212,29 +196,36 @@ let addShipToBoard (game: Game, s: Ship, board: Board) =
         ConsoleHelper.drawBoards game
         None
 
+let shipCollidesWithExistingShip (ship: Ship, board: Board): bool =
+    let existingShipCoords = getRemainingShipsForBoard board |> List.map (fun field -> field.Coord)
+    let shipCoords = createCoordList ship
+    let intersection = Set.intersect (Set.ofList existingShipCoords) (Set.ofList shipCoords) |> Set.toList
+    intersection.Length > 0
 
 // Cheat code - Show all ships
 let showShips (game: Game) =
-    // System.Console.Clear()
     ConsoleHelper.drawShips (game)
     game
 
-
 let setShip (game: Game, s: Ship): Game =
 
-    // TODO: check if ship does not collide with other ships
     match shipOnBoard (s, game.Size) with
     | true ->
         match game.Status with
         | SetupShips shipIdx when shipIdx < game.RequiredShips.Length ->
-            let humandboard = addShipToBoard (game, s, game.HumanBoard)
-            if humandboard.IsSome then
-                let newGame = { game with HumanBoard = humandboard.Value }
-                let newShipIdx = shipIdx + 1
-                if newShipIdx >= newGame.RequiredShips.Length then { newGame with Status = Running }
-                else { newGame with Status = SetupShips newShipIdx }
-            else
+            match shipCollidesWithExistingShip (s, game.HumanBoard) with
+            | true ->
+                printfn ("ship cannot be placed on the board because there is already another ship - try again!")
                 game
+            | false ->
+                let humandboard = addShipToBoard (game, s, game.HumanBoard)
+                if humandboard.IsSome then
+                    let newGame = { game with HumanBoard = humandboard.Value }
+                    let newShipIdx = shipIdx + 1
+                    if newShipIdx >= newGame.RequiredShips.Length then { newGame with Status = Running }
+                    else { newGame with Status = SetupShips newShipIdx }
+                else
+                    game
         | _ ->
             printfn ("enough ships - lets play!")
             printfn ("use command 'Try' and coordinates like A2  and destroy the computers ships")
