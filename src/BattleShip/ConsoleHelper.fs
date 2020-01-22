@@ -3,7 +3,7 @@ module ConsoleHelper
 open Domain
 
 // Get character Range for provided board
-let getCharacterRange (length: int): List<char> = [ 'A' .. 'Z' ].[0..(length - 1)]
+let getCharacterRange (length: int): char list = [ 'A' .. 'Z' ].[0..(length - 1)]
 
 // String representation of a Field
 let fieldToAttemptStatus (field: Field): string =
@@ -50,7 +50,7 @@ let horizontallLine (size: int) =
     String.replicate cnt "-"
 
 
-let createBoardStringList (board: Board, fieldStrings: List<string>) =
+let createBoardStringList (board: Board, fieldStrings: string list) =
     let boardCharacterRange = getCharacterRange board.Size
     let guiHorizontalLine = [ "   " + (horizontallLine board.Size) ]
 
@@ -78,7 +78,7 @@ let createBoardStringList (board: Board, fieldStrings: List<string>) =
 
     output
 
-let drawBoardWithGui (board: Board, fieldStrings: List<string>): unit =
+let drawBoardWithGui (board: Board, fieldStrings: string list): unit =
     printfn "%s" ( createBoardStringList(board, fieldStrings))
 
 

@@ -4,7 +4,7 @@ open Domain
 open Utils
 
 // Return a list of all Fields with FieldAttemptStatus = NotAttempted
-let getNotAttemptedFieldsForBoard (board: Board): List<Field> =
+let getNotAttemptedFieldsForBoard (board: Board): Field list =
     board.Fields |> List.filter (fun field -> field.AttemptStatus = NotAttempted)
 
 // Add a new ShipPoint at the provided Coord to the provided Board
@@ -21,7 +21,7 @@ let addShipPointAtCoordToBoard (coord: Coord, board: Board): Board =
     { board with Fields = newFields }
 
 // Return a list of Fields with ShipStatus = Ship
-let getRemainingShipsForBoard (board: Board): List<Field> =
+let getRemainingShipsForBoard (board: Board): Field list =
     board.Fields |> List.filter (fun field -> field.ShipStatus = Ship)
 
 // Check if the provided coordinate is even on the board
@@ -49,7 +49,7 @@ let initNewField (coord: Coord): Field =
       ShipStatus = Water }
 
 // Create a list of all Coords for the given size
-let createCoordsForSize (size: int): List<Coord> =
+let createCoordsForSize (size: int): Coord list =
     let coordCharacters = ConsoleHelper.getCharacterRange size
     [ for i in 1 .. size do
         for character in coordCharacters ->
