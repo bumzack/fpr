@@ -18,6 +18,7 @@ let read (input: string) =
     | ParseFailed -> NotParsable input
 
 open Domain
+open DomainFunctions
 open Microsoft.FSharp.Reflection
 
 let createHelpText(): string =

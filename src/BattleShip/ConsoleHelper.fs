@@ -2,6 +2,9 @@ module ConsoleHelper
 
 open Domain
 
+// Get character Range for provided board
+let getCharacterRange (length: int): List<char> = [ 'A' .. 'Z' ].[0..(length - 1)]
+
 // String representation of a Field
 let fieldToAttemptStatus (field: Field): string =
     match field.AttemptStatus with
