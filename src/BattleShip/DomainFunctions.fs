@@ -68,7 +68,7 @@ let rec createRandomShip (size: int, len: int) =
 
     match shipOnBoard (ship, size) with
     | true -> ship
-    | false -> createRandomShip (len, size)
+    | false -> createRandomShip (size, len)
 
 // Initialize a new Game
 let initNewGame (size: int): Game =
