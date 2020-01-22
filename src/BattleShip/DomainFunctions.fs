@@ -307,7 +307,7 @@ let tryHitAt (game: Game, humanMoveCoord: Coord) =
                     else
                         printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
 
-                    printfn "You have another go!"
+                    printfn "Try again !"
                     printfn ""
 
                     newGame2
