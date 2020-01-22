@@ -29,18 +29,6 @@ let createCoordsForSize (size: int): List<Coord> =
             { X = character
               Y = i } ]
 
-let rec addShipsToBoard (board: Board, ships: Ship list) =
-    match ships with
-    | head :: tail ->
-        let newBoard = addShipPointsToBoard (board, head)
-        addShipsToBoard (newBoard, tail)
-    | [] -> board
-
-let setRandomShipForBoard (board: Board): Board =
-    let emptyFields = getEmptyFieldsForBoard board
-    let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)].Coord
-    addShipPointAtCoordToBoard (coord, board)
-
 let randomCoord (size: int): Coord =
     let emptyFields = createCoordsForSize (size)
     let coord = emptyFields.[System.Random().Next(0, emptyFields.Length - 1)]

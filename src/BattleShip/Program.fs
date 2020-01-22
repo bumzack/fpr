@@ -1,8 +1,5 @@
 ﻿[<EntryPoint>]
 let main argv =
-
-    // System.Console.Clear()
-
     printfn ""
     printfn "   ================================="
     printfn "   Welcome to BattleShip!"

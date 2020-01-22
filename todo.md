@@ -6,6 +6,7 @@
 ## wäre nett
 - [ ] doppelte eingaben abfange
 - [ ] Schiffe auf benachbarten Feldern verhindern
+- [ ] Variable Brettgröße mit unterschiedlichen Schiffgrößen
 
 ## erledigt
 - [x] überdeckende ships für computer verhindern
