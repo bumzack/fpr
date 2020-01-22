@@ -5,7 +5,6 @@
 
 ## wäre nett
 - [ ] doppelte eingaben abfangen
-- [ ] Schiffe auf benachbarten Feldern verhindern
 - [ ] Variable Brettgröße mit unterschiedlichen Schiffgrößen
 
 ## erledigt

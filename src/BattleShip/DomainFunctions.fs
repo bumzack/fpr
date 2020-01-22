@@ -76,8 +76,27 @@ let shipOnBoard (s: Ship, size: int) =
         let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
         coordsNotOnBoard.Length = 0
 
+let previousCharacter (character: char): char =
+    (char)((int)character - 1)
+
+let nextCharacter (character: char): char =
+    (char)((int)character + 1)
+
+let addDisallowedCoords (coords: Coord list): Coord list =
+    let westCoords = coords |> List.map (fun coord -> { coord with X = previousCharacter coord.X })
+    let eastCoords = coords |> List.map (fun coord -> { coord with X = nextCharacter coord.X })
+    let northCoords = coords |> List.map (fun coord -> { coord with Y = coord.Y - 1 })
+    let southCoords = coords |> List.map (fun coord -> { coord with Y = coord.Y + 1 })
+
+    (Set.ofList coords)
+        |> Set.union (Set.ofList westCoords)
+        |> Set.union (Set.ofList eastCoords)
+        |> Set.union (Set.ofList northCoords)
+        |> Set.union (Set.ofList southCoords)
+        |> Set.toList
+
 let shipCollidesWithExistingShip (ship: Ship, board: Board): bool =
-    let existingShipCoords = getRemainingShipsForBoard board |> List.map (fun field -> field.Coord)
+    let existingShipCoords = getRemainingShipsForBoard board |> List.map (fun field -> field.Coord) |> addDisallowedCoords
     let shipCoords = createCoordList ship
     let intersection = Set.intersect (Set.ofList existingShipCoords) (Set.ofList shipCoords) |> Set.toList
     intersection.Length > 0
