@@ -61,14 +61,33 @@ let shipOnBoard (s: Ship, size: int) =
         let coordsNotOnBoard = List.filter (curriedIsCoordNotOnBoard size) shipCoords
         coordsNotOnBoard.Length = 0
 
-let rec createRandomShip (size: int, len: int) =
-    let pos = randomCoord (size)
-    let direction = randomDirection()
-    let ship = mapToShip (pos, len, direction)
+let shipCollidesWithExistingShip (ship: Ship, board: Board): bool =
+    let existingShipCoords = getRemainingShipsForBoard board |> List.map (fun field -> field.Coord)
+    let shipCoords = createCoordList ship
+    let intersection = Set.intersect (Set.ofList existingShipCoords) (Set.ofList shipCoords) |> Set.toList
+    intersection.Length > 0
 
-    match shipOnBoard (ship, size) with
-    | true -> ship
-    | false -> createRandomShip (size, len)
+let rec createRandomShip (board: Board, length: int): Board =
+    let pos = randomCoord (board.Size)
+    let direction = randomDirection()
+    let ship = mapToShip (pos, length, direction)
+
+    match shipOnBoard (ship, board.Size) with
+    | true ->
+        match shipCollidesWithExistingShip (ship, board) with
+        | true ->
+            createRandomShip (board, length)
+        | false ->
+            addShipPointsToBoard (board, ship)
+    | false ->
+        createRandomShip (board, length)
+
+let rec createRandomShips (board: Board, ships: int list): Board =
+    match ships with
+    | head :: tail ->
+        let newboard = createRandomShip (board, head)
+        createRandomShips (newboard, tail)
+    | [] -> board
 
 // Initialize a new Game
 let initNewGame (size: int): Game =
@@ -84,10 +103,7 @@ let initNewGame (size: int): Game =
         { Fields = newFieldList
           Size = size }
 
-    // currying for the first time https://stackoverflow.com/questions/50105745/list-map-with-multiple-parameters-in-f
-    let curriedCreateRandomShip s l = createRandomShip (s, l)
-    let randomShips = List.map (curriedCreateRandomShip size) requiredShips
-    let computerBoard = addShipsToBoard (tmpComputerBoard, randomShips)
+    let computerBoard = createRandomShips (tmpComputerBoard, requiredShips)
 
     { HumanBoard = humanBoard
       ComputerBoard = computerBoard
@@ -195,12 +211,6 @@ let addShipToBoard (game: Game, s: Ship, board: Board) =
     | _ ->
         ConsoleHelper.drawBoards game
         None
-
-let shipCollidesWithExistingShip (ship: Ship, board: Board): bool =
-    let existingShipCoords = getRemainingShipsForBoard board |> List.map (fun field -> field.Coord)
-    let shipCoords = createCoordList ship
-    let intersection = Set.intersect (Set.ofList existingShipCoords) (Set.ofList shipCoords) |> Set.toList
-    intersection.Length > 0
 
 // Cheat code - Show all ships
 let showShips (game: Game) =
