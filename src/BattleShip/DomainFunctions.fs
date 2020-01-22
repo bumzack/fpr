@@ -88,12 +88,16 @@ let rec createRandomShip (board: Board, length: int): Board =
     let ship = mapToShip (pos, length, direction)
 
     match shipOnBoard (ship, board.Size) with
+
     | true ->
         match shipCollidesWithExistingShip (ship, board) with
         | true ->
             createRandomShip (board, length)
         | false ->
-            addShipPointsToBoard (board, ship)
+            let newboard = addShipPointsToBoard (board, ship)
+            let ships = ship :: board.Ships
+            let newboard2 = { newboard with Ships = ships }
+            newboard2
     | false ->
         createRandomShip (board, length)
 
@@ -112,11 +116,13 @@ let initNewGame (size: int): Game =
 
     let humanBoard =
         { Fields = newFieldList
-          Size = size }
+          Size = size
+          Ships = [] }
 
     let tmpComputerBoard =
         { Fields = newFieldList
-          Size = size }
+          Size = size
+          Ships = [] }
 
     let computerBoard = createRandomShips (tmpComputerBoard, requiredShips)
 
@@ -159,67 +165,163 @@ let hitOnBoard (board: Board, c: Coord) =
     let hit = (getRemainingShipsForBoard board).Length > (getRemainingShipsForBoard newBoard).Length
     (newBoard, hit)
 
+
+
+let getHitShipsForBoard (board: Board): Field list =
+    board.Fields |> List.filter (fun field -> field.ShipStatus = ShipHit)
+
+let isShipSunk (board: Board, s: Ship) =
+    let shipCoordinates = createCoordList s
+    let hitShipCoords = getHitShipsForBoard board |> List.map (fun field -> field.Coord)
+    let len = shipCoordinates.Length
+
+    let intersection = Set.intersect (Set.ofList hitShipCoords) (Set.ofList shipCoordinates) |> Set.toList
+    intersection.Length = len
+
+
+// https://stackoverflow.com/questions/2889961/f-insert-remove-item-from-list
+let rec remove i l =
+    match i, l with
+    | 0, x :: xs -> xs
+    | i, x :: xs -> x :: remove (i - 1) xs
+    | i, [] -> failwith "index out of range"
+
+let shipSunk (board: Board) =
+    let curriedIsShipSunk b s = isShipSunk (b, s)
+
+    // list bools
+    let sunkShips = List.map (curriedIsShipSunk board) board.Ships
+
+    // list where bool = true
+    let isAnyHit = sunkShips |> List.filter (fun b -> b)
+
+    if isAnyHit.Length > 0 then
+
+        let sunkShipIdx = sunkShips |> Seq.findIndex (fun b -> b)
+        let ships = remove sunkShipIdx board.Ships
+        let newBoard = { board with Ships = ships }
+        (newBoard, true)
+    else
+        (board, false)
+
+
+
+
+let shipSunkComputerBoard (game: Game) =
+    let (newComputerBoard, shipSunk) = shipSunk (game.ComputerBoard)
+
+    let newGame2 =
+        match shipSunk with
+        | true ->
+            { game with ComputerBoard = newComputerBoard }
+        | false ->
+            game
+    (newGame2, shipSunk)
+
+let shipSunkHumanBoard (game: Game) =
+    let (newHumanBoard, shipSunk) = shipSunk (game.HumanBoard)
+
+    let newGame2 =
+        match shipSunk with
+        | true ->
+            { game with HumanBoard = newHumanBoard }
+        | false ->
+            game
+    (newGame2, shipSunk)
+
+
+
 let rec runComputerLoop (game: Game) =
     let computerMoveCoord = computerMove game.HumanBoard
     let (newHumanBoard, computerHasHit) = hitOnBoard (game.HumanBoard, computerMoveCoord)
+    let newGame = { game with HumanBoard = newHumanBoard }
 
-    match computerHasHit with
-    | false ->
-        printfn ""
-        printfn "The computer tried at %c%i and missed" computerMoveCoord.X computerMoveCoord.Y
-    | true ->
-        printfn ""
-        printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
+    let newGame2 =
+        match computerHasHit with
+        | false ->
+            printfn ""
+            printfn "The computer tried at %c%i and missed" computerMoveCoord.X computerMoveCoord.Y
+            newGame
+        | true ->
+            let (newGame2, shipSunk) = shipSunkHumanBoard (newGame)
+
+            printfn ""
+            if shipSunk then
+                printfn "The computer hit at %c%i" computerMoveCoord.X computerMoveCoord.Y
+                printf "\n ohh nooo!  the computer sunk a ship\n"
+            else
+                printfn "The computer hit at %c%i" computerMoveCoord.X computerMoveCoord.Y
+
+            printfn ""
+            printfn "The computer tried at %c%i and made a hit! " computerMoveCoord.X computerMoveCoord.Y
+            newGame2
 
     printfn ""
-    let newGame = { game with HumanBoard = newHumanBoard }
-    ConsoleHelper.drawBoards newGame
+
+    ConsoleHelper.drawBoards newGame2
 
     match computerHasHit with
     | false ->
-        newGame
+        newGame2
     | true ->
-        runComputerLoop (newGame)
+        runComputerLoop (newGame2)
+
 
 let tryHitAt (game: Game, humanMoveCoord: Coord) =
-    let newGame =
-        match isValidGameCoord (game, humanMoveCoord) with
-        | true ->
-            let (newComputerBoard, humanHasHit) = hitOnBoard (game.ComputerBoard, humanMoveCoord)
-
-            match humanHasHit with
+    match game.Status with
+    | Running ->
+        let newGame =
+            match isValidGameCoord (game, humanMoveCoord) with
             | true ->
-                let newGame = { game with ComputerBoard = newComputerBoard }
-                ConsoleHelper.drawBoards newGame
-                printfn ""
-                printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
-                printfn "You have another go!"
-                printfn ""
+                let (newComputerBoard, humanHasHit) = hitOnBoard (game.ComputerBoard, humanMoveCoord)
 
-                newGame
+                match humanHasHit with
+                | true ->
+                    let newGame = { game with ComputerBoard = newComputerBoard }
+                    let (newGame2, shipSunk) = shipSunkComputerBoard (newGame)
 
+                    ConsoleHelper.drawBoards newGame2
+                    printfn ""
+                    if shipSunk then
+                        printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
+                        printf "\nGREAT!   you sunk a ship\n"
+                    else
+                        printfn "You hit at %c%i" humanMoveCoord.X humanMoveCoord.Y
+
+                    printfn "You have another go!"
+                    printfn ""
+
+                    newGame2
+
+                | false ->
+                    printfn ""
+                    printfn "You missed at %c%i" humanMoveCoord.X humanMoveCoord.Y
+                    printfn ""
+                    printfn "now it's the computers turn"
+                    let newGame = { game with ComputerBoard = newComputerBoard }
+                    let newGame = runComputerLoop (newGame)
+                    newGame
             | false ->
-                printfn ""
-                printfn "You missed at %c%i" humanMoveCoord.X humanMoveCoord.Y
-                printfn ""
-                printfn "now it's the computers turn"
-                let newGame = { game with ComputerBoard = newComputerBoard }
-                let newGame = runComputerLoop (newGame)
-                newGame
-        | false ->
-            printfn "The given coordinate is not valid!"
-            game
+                printfn "The given coordinate is not valid!"
+                game
 
-    if (allShipsDestroyed (newGame.HumanBoard)) then { newGame with Status = WonBy Computer }
-    elif (allShipsDestroyed (newGame.ComputerBoard)) then { newGame with Status = WonBy Human }
-    else newGame
+        if (allShipsDestroyed (newGame.HumanBoard)) then { newGame with Status = WonBy Computer }
+        elif (allShipsDestroyed (newGame.ComputerBoard)) then { newGame with Status = WonBy Human }
+        else newGame
+
+    | _ ->
+        printfn "game not in status 'Running' but in status '%A'!" game.Status
+        printfn "finish setting up your ships to play"
+        game
 
 let addShipToBoard (game: Game, s: Ship, board: Board) =
     match game.Status with
     | SetupShips idx when idx < game.RequiredShips.Length ->
         if s.length = game.RequiredShips.[idx] then
             let newBoard = addShipPointsToBoard (board, s)
-            Some(newBoard)
+            let ships = s :: newBoard.Ships
+            let newBoard2 = { newBoard with Ships = ships }
+            Some(newBoard2)
         else
             printfn "Your ship has length %i but should have length %i - try again!" s.length game.RequiredShips.[idx]
             None

@@ -1,15 +1,15 @@
 # Todo
 
 ## wäre gut
-- [ ] es gibt kein "Schiff 1 versenkt", dann "Schiff 2 versenkt" -- Spiel ist einfach aus, wenn  alle Felder mit Schiffen getroffen wurden
 - [ ] Projekt aufräumen (obsolete code & files)
 
 ## wäre nett
-- [ ] doppelte eingaben abfange
+- [ ] doppelte eingaben abfangen
 - [ ] Schiffe auf benachbarten Feldern verhindern
 - [ ] Variable Brettgröße mit unterschiedlichen Schiffgrößen
 
 ## erledigt
+- [x] es gibt kein "Schiff 1 versenkt", dann "Schiff 2 versenkt" -- Spiel ist einfach aus, wenn  alle Felder mit Schiffen getroffen wurden
 - [x] überdeckende ships für computer verhindern
 - [x] überdeckende inputs checken. Beispiel: `Set A1 2 S` und `Set B2 2 W` ist legal
 - [x] beim HumanPlayer die Schiffe anzeigen in ```drawBoards (game: Game) ```

@@ -18,9 +18,6 @@ type Field =
       AttemptStatus: FieldAttemptStatus
       ShipStatus: FieldShipStatus }
 
-type Board =
-    { Fields: Field list
-      Size: int }
 
 type Player =
     | Human
@@ -42,6 +39,11 @@ type Ship = {
     pos: Coord
     direction: Direction
 }
+
+type Board =
+    { Fields: Field list
+      Size: int
+      Ships: Ship list }
 
 type Game =
     { HumanBoard: Board
