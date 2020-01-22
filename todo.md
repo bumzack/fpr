@@ -6,10 +6,10 @@
 
 ## wäre nett
 - [ ] doppelte eingaben abfange
-- [ ] Schiffe auf benachbarten Feldern verhindern
 - [ ] Variable Brettgröße mit unterschiedlichen Schiffgrößen
 
 ## erledigt
+- [x] Schiffe auf benachbarten Feldern verhindern
 - [x] überdeckende ships für computer verhindern
 - [x] überdeckende inputs checken. Beispiel: `Set A1 2 S` und `Set B2 2 W` ist legal
 - [x] beim HumanPlayer die Schiffe anzeigen in ```drawBoards (game: Game) ```
