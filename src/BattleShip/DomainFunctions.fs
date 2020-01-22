@@ -129,7 +129,7 @@ let rec createRandomShips (board: Board, ships: int list): Board =
 
 // Initialize a new Game
 let initNewGame (size: int): Game =
-    let requiredShips = [ 2; 2 ]
+    let requiredShips = [ 2; 3 ]
 
     let newFieldList = createCoordsForSize size |> List.map initNewField
 
